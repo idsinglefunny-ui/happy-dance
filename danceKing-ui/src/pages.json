@@ -1,0 +1,37 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "全国舞讯",
+				"navigationBarBackgroundColor": "#0b0b0e",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/claim/claim",
+			"style": {
+				"navigationBarTitleText": "认领舞厅",
+				"navigationBarBackgroundColor": "#0b0b0e",
+				"navigationBarTextStyle": "white"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "莎莎舞厅",
+		"navigationBarBackgroundColor": "#0b0b0e",
+		"backgroundColor": "#0b0b0e"
+	},
+    "tabBar": {
+        "color": "#888888",
+        "selectedColor": "#e5007f",
+        "backgroundColor": "#15151e",
+        "list": [
+            {
+                "pagePath": "pages/index/index",
+                "text": "首页"
+            }
+        ]
+    }
+}
