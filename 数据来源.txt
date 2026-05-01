@@ -1,0 +1,1078 @@
+舞图图小程序有一个全国舞询的功能，可以生成全国的实时营业的舞厅的数据。
+CURL 接口：
+curl -X GET 'https://api.dancehallmap.com:59876/api/dance-hall/daily-overview?openStatus=1' -H 'Host: api.dancehallmap.com:59876' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf254186b) XWEB/19481' -H 'Authorization: ' -H 'xweb_xhr: 1' -H 'Content-Type: application/json' -H 'Sec-Fetch-Site: cross-site' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Dest: empty' -H 'Referer: https://servicewechat.com/wx9239d3944daed5bc/87/page-frame.html' -H 'Accept-Language: zh-CN,zh;q=0.9' --http1.1
+
+为了避免风控，调用的时候，请参考这个CURL进行伪装。
+
+
+
+先查询省份category
+curl -X GET 'https://wxyyh.tdotapp.com/applet.php?suid=i1u6fsvy43&appid=wxc7a769f9108b190d&system=android&plum_session_applet=lhf1shvva0dcl3ttlisgb55jue&map=applet_city_shop_page' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf254186b) XWEB/19481' -H 'xweb_xhr: 1' -H 'Content-Type: application/json' -H 'Sec-Fetch-Site: cross-site' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Dest: empty' -H 'Referer: https://servicewechat.com/wxc7a769f9108b190d/7/page-frame.html' -H 'Accept-Language: zh-CN,zh;q=0.9' --http1.1
+返回如下:
+{
+  "data": {
+    "slide": [
+      {
+        "imgsrc": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250916/B1DFCC48-7E03-3375-C760866A2DFE.jpeg",
+        "shopId": "/pages/settled/settled",
+        "link": "/pages/settled/settled",
+        "url": "/pages/settled/settled?title=",
+        "type": "2"
+      },
+      {
+        "imgsrc": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250916/A23DD787-FC2E-5855-AD95A91F8ECD.jpeg",
+        "shopId": "2740473",
+        "link": "2740473",
+        "url": "/pages/goodDetail/goodDetail?id=2740473",
+        "type": "5"
+      }
+    ],
+    "category": [
+      {
+        "id": "255576",
+        "name": "四川省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/24E0B298-D3C1-8812-449E1EB63416.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255487",
+        "name": "陕西省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/BA0B929A-1AEC-2493-3FCCD40D7B3E.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255488",
+        "name": "河北省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/BFA344BA-C7EF-3229-0B2FA4D01CA2.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255545",
+        "name": "山西省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/5E73F90E-4D35-9519-4FE790D611DD.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255546",
+        "name": "辽宁省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/86E7FD23-A884-7625-9B06C6684A37.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255555",
+        "name": "吉林省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/3674B387-DCD3-7108-3E3C963D12B6.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255566",
+        "name": "浙江省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/B422E078-85D3-5872-280286B8B4D1.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255565",
+        "name": "江苏省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/967ADF89-97A3-8704-69EA54B33468.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255567",
+        "name": "安徽省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/F73F0684-F862-9583-26EF41EFF266.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255568",
+        "name": "福建省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/6CF235FF-B618-7800-E599B1FBE7AE.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255569",
+        "name": "江西省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/00976E98-9AF1-3085-CA92290C4A09.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255570",
+        "name": "山东省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/8290A171-7202-4299-019B7A00F1CA.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255571",
+        "name": "河南省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/63C6CB5F-7688-4568-FDAB19D264C0.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255572",
+        "name": "湖北省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/80F4C7BB-C871-4359-332EEC1FBB9B.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255573",
+        "name": "湖南省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/B48A9250-6B61-9406-758DF105B827.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255574",
+        "name": "广东省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/1DE44BBD-5AF1-1303-6789FE01540F.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255575",
+        "name": "海南省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/18893A62-BFEA-7272-B0A57FEC99C7.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255593",
+        "name": "贵州省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/2CD0B7BB-1670-5961-07BED31E24C3.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255594",
+        "name": "云南省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/3E637195-8989-9380-D2CDB7207587.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255595",
+        "name": "甘肃省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/62B2C5BB-EC7A-4064-0FC671C6218E.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255596",
+        "name": "青海省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/2E773E8D-6137-4836-FE4F973421D0.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255556",
+        "name": "黑龙江省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/F0B9C84D-D7C5-2136-1C4C63C33E85.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255598",
+        "name": "北京直辖市",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/905C714D-6702-1789-763720BB3B15.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255599",
+        "name": "天津直辖市",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/36595A11-8341-5344-FE57E873B406.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255608",
+        "name": "上海直辖市",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/F88FFF19-AED3-6837-19B4958AA939.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255609",
+        "name": "重庆直辖市",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/0F1BC3D2-F58F-2412-D5AF7AEA2562.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255610",
+        "name": "内蒙古自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/3D41A8D1-F9B1-2917-1EFE33F9944A.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255611",
+        "name": "广西壮族自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/EE7458A3-BE8C-5645-863C93F81F32.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255612",
+        "name": "西藏自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/7B7A191E-20CE-9669-A3F238525C8F.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255613",
+        "name": "宁夏自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/EA6D2384-DAB7-5105-1CAA57175A03.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255614",
+        "name": "新疆维吾尔自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/9712576D-28A0-2571-C905D7D49ACC.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255615",
+        "name": "香港特别行政区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/CCDF81F4-FB27-8570-AEE7BDEA6A0D.jpeg",
+        "price": "0.00",
+        "biref": ""
+      },
+      {
+        "id": "255616",
+        "name": "澳门特别行政区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/EB988CA7-7779-4865-4FBB1AF13352.jpeg",
+        "price": "0.00",
+        "biref": ""
+      }
+    ],
+    "shortcut": [
+      {
+        "name": "四川省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/24E0B298-D3C1-8812-449E1EB63416.jpeg",
+        "link": "255576",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255576&title=四川省",
+        "brief": ""
+      },
+      {
+        "name": "陕西省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/BA0B929A-1AEC-2493-3FCCD40D7B3E.jpeg",
+        "link": "255487",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255487&title=陕西省",
+        "brief": ""
+      },
+      {
+        "name": "河北省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/BFA344BA-C7EF-3229-0B2FA4D01CA2.jpeg",
+        "link": "255488",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255488&title=河北省",
+        "brief": ""
+      },
+      {
+        "name": "山西省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/5E73F90E-4D35-9519-4FE790D611DD.jpeg",
+        "link": "255545",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255545&title=山西省",
+        "brief": ""
+      },
+      {
+        "name": "辽宁省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/86E7FD23-A884-7625-9B06C6684A37.jpeg",
+        "link": "255546",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255546&title=辽宁省",
+        "brief": ""
+      },
+      {
+        "name": "吉林省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/3674B387-DCD3-7108-3E3C963D12B6.jpeg",
+        "link": "255555",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255555&title=吉林省",
+        "brief": ""
+      },
+      {
+        "name": "浙江省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/B422E078-85D3-5872-280286B8B4D1.jpeg",
+        "link": "255566",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255566&title=浙江省",
+        "brief": ""
+      },
+      {
+        "name": "江苏省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/967ADF89-97A3-8704-69EA54B33468.jpeg",
+        "link": "255565",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255565&title=江苏省",
+        "brief": ""
+      },
+      {
+        "name": "安徽省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/F73F0684-F862-9583-26EF41EFF266.jpeg",
+        "link": "255567",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255567&title=安徽省",
+        "brief": ""
+      },
+      {
+        "name": "福建省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/6CF235FF-B618-7800-E599B1FBE7AE.jpeg",
+        "link": "255568",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255568&title=福建省",
+        "brief": ""
+      },
+      {
+        "name": "江西省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/00976E98-9AF1-3085-CA92290C4A09.jpeg",
+        "link": "255569",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255569&title=江西省",
+        "brief": ""
+      },
+      {
+        "name": "山东省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/8290A171-7202-4299-019B7A00F1CA.jpeg",
+        "link": "255570",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255570&title=山东省",
+        "brief": ""
+      },
+      {
+        "name": "河南省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/63C6CB5F-7688-4568-FDAB19D264C0.jpeg",
+        "link": "255571",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255571&title=河南省",
+        "brief": ""
+      },
+      {
+        "name": "湖北省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/80F4C7BB-C871-4359-332EEC1FBB9B.jpeg",
+        "link": "255572",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255572&title=湖北省",
+        "brief": ""
+      },
+      {
+        "name": "湖南省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/B48A9250-6B61-9406-758DF105B827.jpeg",
+        "link": "255573",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255573&title=湖南省",
+        "brief": ""
+      },
+      {
+        "name": "广东省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/1DE44BBD-5AF1-1303-6789FE01540F.jpeg",
+        "link": "255574",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255574&title=广东省",
+        "brief": ""
+      },
+      {
+        "name": "海南省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/18893A62-BFEA-7272-B0A57FEC99C7.jpeg",
+        "link": "255575",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255575&title=海南省",
+        "brief": ""
+      },
+      {
+        "name": "贵州省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/2CD0B7BB-1670-5961-07BED31E24C3.jpeg",
+        "link": "255593",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255593&title=贵州省",
+        "brief": ""
+      },
+      {
+        "name": "云南省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/3E637195-8989-9380-D2CDB7207587.jpeg",
+        "link": "255594",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255594&title=云南省",
+        "brief": ""
+      },
+      {
+        "name": "甘肃省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/62B2C5BB-EC7A-4064-0FC671C6218E.jpeg",
+        "link": "255595",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255595&title=甘肃省",
+        "brief": ""
+      },
+      {
+        "name": "青海省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/2E773E8D-6137-4836-FE4F973421D0.jpeg",
+        "link": "255596",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255596&title=青海省",
+        "brief": ""
+      },
+      {
+        "name": "黑龙江省",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/F0B9C84D-D7C5-2136-1C4C63C33E85.jpeg",
+        "link": "255556",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255556&title=黑龙江省",
+        "brief": ""
+      },
+      {
+        "name": "北京直辖市",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/905C714D-6702-1789-763720BB3B15.jpeg",
+        "link": "255598",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255598&title=北京直辖市",
+        "brief": ""
+      },
+      {
+        "name": "天津直辖市",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/36595A11-8341-5344-FE57E873B406.jpeg",
+        "link": "255599",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255599&title=天津直辖市",
+        "brief": ""
+      },
+      {
+        "name": "上海直辖市",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/F88FFF19-AED3-6837-19B4958AA939.jpeg",
+        "link": "255608",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255608&title=上海直辖市",
+        "brief": ""
+      },
+      {
+        "name": "重庆直辖市",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/0F1BC3D2-F58F-2412-D5AF7AEA2562.jpeg",
+        "link": "255609",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255609&title=重庆直辖市",
+        "brief": ""
+      },
+      {
+        "name": "内蒙古自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/3D41A8D1-F9B1-2917-1EFE33F9944A.jpeg",
+        "link": "255610",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255610&title=内蒙古自治区",
+        "brief": ""
+      },
+      {
+        "name": "广西壮族自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/EE7458A3-BE8C-5645-863C93F81F32.jpeg",
+        "link": "255611",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255611&title=广西壮族自治区",
+        "brief": ""
+      },
+      {
+        "name": "西藏自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/7B7A191E-20CE-9669-A3F238525C8F.jpeg",
+        "link": "255612",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255612&title=西藏自治区",
+        "brief": ""
+      },
+      {
+        "name": "宁夏自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/EA6D2384-DAB7-5105-1CAA57175A03.jpeg",
+        "link": "255613",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255613&title=宁夏自治区",
+        "brief": ""
+      },
+      {
+        "name": "新疆维吾尔自治区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/9712576D-28A0-2571-C905D7D49ACC.jpeg",
+        "link": "255614",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255614&title=新疆维吾尔自治区",
+        "brief": ""
+      },
+      {
+        "name": "香港特别行政区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/CCDF81F4-FB27-8570-AEE7BDEA6A0D.jpeg",
+        "link": "255615",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255615&title=香港特别行政区",
+        "brief": ""
+      },
+      {
+        "name": "澳门特别行政区",
+        "icon": "http://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250810/EB988CA7-7779-4865-4FBB1AF13352.jpeg",
+        "link": "255616",
+        "type": 34,
+        "url": "/pages/searchShop/searchShop?id=255616&title=澳门特别行政区",
+        "brief": ""
+      }
+    ],
+    "newShop": [
+      {
+        "id": "82620",
+        "name": "唐山市-金梦舞厅入驻本平台！"
+      },
+      {
+        "id": "82619",
+        "name": "唐山市-君悦歌舞厅入驻本平台！"
+      },
+      {
+        "id": "82609",
+        "name": "唐山市-午夜酒吧入驻本平台！"
+      },
+      {
+        "id": "82608",
+        "name": "石家庄-红麦娱乐入驻本平台！"
+      },
+      {
+        "id": "82607",
+        "name": "石家庄-星河歌舞会入驻本平台！"
+      },
+      {
+        "id": "82606",
+        "name": "石家庄-银河歌舞会入驻本平台！"
+      },
+      {
+        "id": "82605",
+        "name": "石家庄-新天地滚石娱乐城（舞厅/迪厅）入驻本平台！"
+      },
+      {
+        "id": "82604",
+        "name": "石家庄-绿洲酒吧（Oasis Club）入驻本平台！"
+      },
+      {
+        "id": "82602",
+        "name": "西安-红河谷音乐吧入驻本平台！"
+      },
+      {
+        "id": "82601",
+        "name": "西安-情缘大众舞厅（情圆）入驻本平台！"
+      }
+    ],
+    "recommend": [],
+    "status": 0,
+    "msg": "您还未入驻",
+    "open": "1",
+    "hide": 1
+  },
+  "timesec": 1777622143,
+  "ec": 200,
+  "em": ""
+}
+
+
+获取到省的category后再查询
+四川省查询
+curl -X GET 'https://wxyyh.tdotapp.com/applet.php?suid=i1u6fsvy43&appid=wxc7a769f9108b190d&system=android&plum_session_applet=inhl062ig3nnas5icd4fh10ete&map=applet_city_new_shop_list&type=nearby&category=255576&page=0&lng=103.85590362548828&lat=30.681440353393555' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf254186b) XWEB/19481' -H 'xweb_xhr: 1' -H 'Content-Type: application/json' -H 'Sec-Fetch-Site: cross-site' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Dest: empty' -H 'Referer: https://servicewechat.com/wxc7a769f9108b190d/7/page-frame.html' -H 'Accept-Language: zh-CN,zh;q=0.9' --http1.1
+
+返回。
+{
+  "data": [
+    {
+      "id": "82381",
+      "name": "成都-世纪红舞厅",
+      "mid": 0,
+      "esId": 152493,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/F287C7EA-81D9-3235-0F9DA194271D.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260121/i9im9pvro2634xb4.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "00:00-23:59",
+      "mobile": "0000000000000003281",
+      "address": "公平温泉大道二段洲际春天广场5栋5层",
+      "lng": "103.869625",
+      "lat": "30.675989",
+      "distance": "1.61km",
+      "showNum": "2.19万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\"></span></strong></span></p><p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">世纪红舞厅</span></strong></span></p><p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"caret-color: red; font-size: 12px;\">地址：温江区公平温泉大道二段洲际春天广场5栋5楼</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：13：30-17：30（午场）、19：30-01：00（晚场）</span></p></li><li><p><span style=\"font-size:12px;\">亮点：门票15元/人，跳舞10元/曲，消费透明。接手原黑武士舞厅场地，拥有一批忠实顾客，舞池布局合理，适合偏爱老舞厅烟火气的舞者，周边商圈配套齐全。</span></p></li></ul></section></p><p><br/></p><hr/><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\"></span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><br/></span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">交流群。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\"></span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\"><br/></span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"></span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong><br/></strong></span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong>便捷管理</strong></span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><img src=\"https://mmbiz.qlogo.cn/sz_mmbiz_jpg/HdXHibYEruFiaaj2c6VZ1pFG0rUv4kf0ia2PEktzQdw2RC4kI495VGLB5mrcqescEVpXeNIA30Mc9e8ajapFarjRg/0?wx_fmt=jpeg&from=appmsg\" class=\"rich_pages wxw-img\"/></span></p><p><br/></p><p><br/></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "1",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260121/i9im9pvro2634xb4.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "2.2万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    },
+    {
+      "id": "82408",
+      "name": "成都-梦驿站舞厅",
+      "mid": 0,
+      "esId": 152777,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/F287C7EA-81D9-3235-0F9DA194271D.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0soadta7c0zaap.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "12:00-12:00",
+      "mobile": "000000000000000000356",
+      "address": "杨柳缘东南门旁",
+      "lng": "103.832459",
+      "lat": "30.684755",
+      "distance": "2.63km",
+      "showNum": "2.00万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">梦驿站舞厅</span></strong></span></p><p></p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"caret-color: red; font-size: 12px;\">地址：温江区杨柳东路中段210号</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：13：30-17：30（午场）、19：30-01：00（晚场）</span></p></li><li><p><span style=\"font-size:12px;\">亮点：温江人气火爆的老牌舞厅，门票15元含矿泉水或茶水，智能柜5元/4小时。位于老城区核心地段，周边热闹，晚场氛围热烈，舞池互动性强，是本地舞者常去的据点。</span></p></li></ul></section><p></p><hr/><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">交流群。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong>便捷管理</strong></span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p><p><br/></p><p><br/></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "0",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0soadta7c0zaap.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "2万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    },
+    {
+      "id": "82409",
+      "name": "成都-夜潮音乐舞厅",
+      "mid": 0,
+      "esId": 152778,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/F287C7EA-81D9-3235-0F9DA194271D.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0swonfkd9q0hes.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "00:00-23:59",
+      "mobile": "0000000000000000023",
+      "address": "南熏大道三段155号附202号凯丽酒店二楼",
+      "lng": "103.828620",
+      "lat": "30.681270",
+      "distance": "3.04km",
+      "showNum": "2.20万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">夜潮音乐舞厅</span></strong></span></p><p></p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"caret-color: red; font-size: 12px;\">地址：成都市温江区南熏大道三段155号附202号（商会大厦/凯丽酒店二楼，杨柳河地铁站D口附近）</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：13：00-17：30（午场）、20：00-01：00（晚场）</span></p></li><li><p><span style=\"font-size:12px;\">亮点：曾是温江砂舞代表，门票15元/人，跳舞10-20元/曲。舞池宽敞、灯光柔和，一半区域绿植遮掩，布局清晰，设有卡座与散座，存包服务便捷，交通直达性高。</span></p></li></ul></section><p></p><p><br/></p><p><br/></p><hr/><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">交流群。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong>便捷管理</strong></span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p><p><br/></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "0",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0swonfkd9q0hes.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "2.2万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    },
+    {
+      "id": "82380",
+      "name": "成都-花舞盛宴（温江店）",
+      "mid": 0,
+      "esId": 152492,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/F287C7EA-81D9-3235-0F9DA194271D.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260121/i9im62pf708f4839.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "00:00-23:59",
+      "mobile": "0000000000000333678",
+      "address": "花舞盛宴",
+      "lng": "103.889362",
+      "lat": "30.678159",
+      "distance": "3.74km",
+      "showNum": "2.18万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">花舞盛宴（温江店）</span></strong></span></p><p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"caret-color: red; font-size: 12px;\">地址：温江区凤凰大街地铁口旁三楼</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：13：30-17：30（午场）、19：30-01：00（晚场）</span></p></li><li><p><span style=\"font-size:12px;\">亮点：新店开业福利丰厚，双人票仅15元，17：30-19：30免门票入场，双旦期间22：30前到场可享指定酒水免费。装修独具匠心，舞池宽敞，绚丽灯光搭配动感音乐，氛围拿捏到位，周边交通便利，地铁直达超方便。</span></p></li></ul></section></p><p><br/></p><hr/><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\"></span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><br/></span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅交流群。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\"></span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\"><br/></span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"></span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong><br/></strong></span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong>便捷管理</strong></span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><img src=\"https://mmbiz.qlogo.cn/sz_mmbiz_jpg/HdXHibYEruFiaaj2c6VZ1pFG0rUv4kf0ia2PEktzQdw2RC4kI495VGLB5mrcqescEVpXeNIA30Mc9e8ajapFarjRg/0?wx_fmt=jpeg&from=appmsg\" class=\"rich_pages wxw-img\"/></span></p><p><br/></p><p><br/></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "1",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260121/i9im62pf708f4839.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "2.2万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    },
+    {
+      "id": "82355",
+      "name": "成都-玫瑰天堂舞厅",
+      "mid": 0,
+      "esId": 152465,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/174582E2-53F9-7100-474DE445B8D0.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260121/i9ii4837ch5bxr9.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "00:00-23:59",
+      "mobile": "0000000000002",
+      "address": "光华东二路98号中铁西城·新天地F1层",
+      "lng": "103.962102",
+      "lat": "30.673366",
+      "distance": "11.85km",
+      "showNum": "1.84万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">玫瑰天堂舞厅</span></strong></span></p><p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"font-size:12px;\">地址：青羊区光华东二路98号10栋三层</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：午场13:30-17:30、晚场19:30-23:30</span></p></li><li><p><span style=\"font-size:12px;\">亮点：门票15元，跳舞10元/曲，场地宽敞，舞曲风格多样，舞友群体稳定</span></p></li></ul></section></p><p><br/></p><hr/><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 20px;\"><strong>.</strong></span><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 20px;\"><strong>.</strong></span><strong><span style=\"font-size: 36px;\"></span><span style=\"font-size: 12px;\">信息权威</span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅交流群。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 20px;\"><strong>.</strong></span><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 20px;\"><strong>.</strong></span><span style=\"font-size: 12px;\"><strong><span style=\"font-size: 36px;\"></span></strong><strong>便捷管理</strong></span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p><p style=\"text-wrap: wrap; overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><img src=\"https://www.tiandiantong.com/upload/depot/i1u6fsvy43/20260121/B7D27A1F-E7AD-5315-839B3F106C84.jpg\"/></span></p><p><br/></p><p><br/></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "2",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260121/i9ii4837ch5bxr9.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "1.8万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    },
+    {
+      "id": "82412",
+      "name": "成都-京鲨跳舞俱乐部",
+      "mid": 0,
+      "esId": 152782,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/7E105D65-5301-3038-5A898A0134FD.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0t6x9dxxfbsdh3.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "00:00-23:59",
+      "mobile": "00000000000012111",
+      "address": "郫筒街道郫花路299号3栋1楼13-16号",
+      "lng": "103.866847",
+      "lat": "30.811099",
+      "distance": "12.46km",
+      "showNum": "3.23万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">京鲨跳舞俱乐部</span></strong></span></p><p></p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"caret-color: red; font-size: 12px;\">地址：郫都区郫筒街道郫花路299号花样世界3栋3层（美年大健康旁电梯上楼）</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：13：00-24：00（全天场）</span></p></li><li><p><span style=\"font-size:12px;\">亮点：门票10元/人、跳舞10元/曲，性价比突出。舞池灯光偏暗，隐秘性强且操作空间大，两端设有专属挑选区，熟女与年轻靓女各占一半，互动热情大方。位置虽稍隐蔽，但导航指引清晰，适合偏爱私密氛围的舞者。</span></p></li></ul></section><p></p><hr/><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">交流群。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong>便捷管理</strong></span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p><p><br/></p><p><br/></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "0",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0t6x9dxxfbsdh3.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "3.2万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    },
+    {
+      "id": "82411",
+      "name": "成都-舞之魅歌舞厅",
+      "mid": 0,
+      "esId": 152781,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/27D56F95-3352-3343-3268ABA3D924.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0t2r9hja331ejy.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "00:00-23:59",
+      "mobile": "00000000000001212",
+      "address": "望从东路398号5栋2层11",
+      "lng": "103.902131",
+      "lat": "30.806701",
+      "distance": "13.04km",
+      "showNum": "3.18万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">舞之魅歌舞厅</span></strong></span></p><p></p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"caret-color: red; font-size: 12px;\">地址：郫都区望丛东路398号5栋2层11号（近万达广场）</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：13：30-17：30（午场）、19：30-24：00（晚场）</span></p></li><li><p><span style=\"font-size:12px;\">亮点：商圈旁热门舞场，周边居民区密集，公交直达超方便。内部空间宽敞，卡座数量充足，大厅灯光明亮但舞池隐秘性强，外侧完全看不到内部情况。美女数量多且年轻群体占比高，人气常年火爆，建议提前到场挑选心仪舞伴。</span></p><hr/><p></p></li><li><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p></li><li><p style=\"overflow-wrap: break-word;\"><br/></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅</span><span style=\"font-size: 12px;\">交流群。</span></p></li><li><p style=\"overflow-wrap: break-word;\"><br/></p></li><li><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p></li><li><p style=\"overflow-wrap: break-word;\"><br/></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong>便捷管理</strong></span></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p></li><li><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p></li></ul></section><p></p><p><br/></p><p><br/></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "0",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0t2r9hja331ejy.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "3.2万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    },
+    {
+      "id": "82410",
+      "name": "成都-亿巴黎歌舞厅",
+      "mid": 0,
+      "esId": 152780,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/7E105D65-5301-3038-5A898A0134FD.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0t0dtlbpcnevfm.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "00:00-23:59",
+      "mobile": "0000000000000000011",
+      "address": "郫筒镇成灌东路38号1栋1单元中铁世纪",
+      "lng": "103.894722",
+      "lat": "30.814358",
+      "distance": "13.43km",
+      "showNum": "2.19万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">亿巴黎舞厅</span></strong></span></p><p></p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"caret-color: red; font-size: 12px;\">地址：郫筒镇成灌东路38号1栋1单元中铁世纪</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：13：30-17：30（午场），晚场暂休（以现场公示为准）</span></p></li><li><p><span style=\"font-size:12px;\">亮点：郫都区老牌正规舞厅，紧邻居民区与家居城，交通便利。装修中规中矩却氛围感十足，地板投射粉紫色玫瑰光影，浪漫感拉满。舞池与休息区分区明确，灯光明暗有致，美女颜值偏高且风格多样，各年龄段舞客都能找到适配节奏。</span></p></li></ul></section><p></p><p><br/></p><p><br/></p><hr/><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\"><br/></span></strong></p><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">交流群。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong>便捷管理</strong></span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p><p><br/></p><p><br/></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "0",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0t0dtlbpcnevfm.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "2.2万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    },
+    {
+      "id": "82416",
+      "name": "成都-盛世舞厅",
+      "mid": 0,
+      "esId": 152788,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/7E105D65-5301-3038-5A898A0134FD.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0ttrrqmw1frwvi.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "00:00-23:59",
+      "mobile": "000000000000001121",
+      "address": "梨园路一段636号",
+      "lng": "103.872713",
+      "lat": "30.822854",
+      "distance": "13.66km",
+      "showNum": "1.86万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">盛世舞厅</span></strong></span></p><p></p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"caret-color: red; font-size: 12px;\">地址：郫都区梨园路一段636号时代派克商业楼</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：12：00-17：20（午场）、19：00-00：00（晚场）</span></p></li><li><p><span style=\"font-size:12px;\">亮点：小区外侧商业区的清爽型舞场，环境整洁无杂乱。舞池设计合理，角落区域更显私密，安保不随意打扰。美女以熟女为主，年轻靓女也不少，类型丰富且互动技巧佳，无机车女情况，消费体验舒心。</span></p></li></ul></section><p></p><hr/><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">交流群。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong>便捷管理</strong></span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "0",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0ttrrqmw1frwvi.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "1.9万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    },
+    {
+      "id": "82414",
+      "name": "成都-金樽熙悦酒吧歌舞厅",
+      "mid": 0,
+      "esId": 152785,
+      "logo": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20260121/F287C7EA-81D9-3235-0F9DA194271D.jpeg",
+      "cover": "https://tdtimg.tiandiantong.net/upload/imglibrary/i1u6fsvy43/20250630/A640A168-C899-5281-69EDA1A6D484.jpeg",
+      "code": [
+        "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0telr8mz2m6zi4.jpg"
+      ],
+      "label": [
+        ""
+      ],
+      "labelType": "0",
+      "brief": "",
+      "openTime": "00:00-23:59",
+      "mobile": "00000000000000212",
+      "address": "红光镇沃尔玛3楼儿童乐园右侧",
+      "lng": "103.943249",
+      "lat": "30.782454",
+      "distance": "13.71km",
+      "showNum": "1.61万",
+      "content": "<p><span style=\"text-decoration-line:underline;\"><strong><span style=\"font-size: 12px;\">金樽熙悦酒吧歌舞厅</span></strong></span></p><p></p><section class=\"_135editor\"><ul class=\" list-paddingleft-2\" style=\"list-style-type: square;\"><li><p><span style=\"caret-color: red; font-size: 12px;\">地址：郫都区红光镇红佳路18号沃尔玛三楼右侧</span></p></li><li><p><span style=\"font-size:12px;\">营业时间：13：30-17：30（午场）、19：30-01：00（晚场）</span></p></li><li><p><span style=\"font-size:12px;\">亮点：商圈全能娱乐场地，兼具舞厅与KTV功能，设大中小包间。装修偏年轻化，舞池配备巨型屏幕，夜场灯光氛围沉浸。美女质量上乘且风格多样，互动技巧高，周边餐饮配套齐全，停车便利（建议避开高峰期）。</span></p></li></ul></section><p></p><p><br/></p><hr/><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">欢迎来到舞厅百事通<strong>-小橙序</strong>！</span></strong><span style=\"font-size: 12px;\">无论你是舞蹈爱好者，还是想体验舞厅文化，这里能快速提供最新资讯，更有精准导航直达。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">标有<strong>“已认领”</strong>的为官方认证舞厅，营业时间、消费等信息可靠；标有<strong>“未认领”</strong>的信息源于网络整理，可能更新延迟，建议收藏关注，或者进舞厅</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">交流群。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><strong><span style=\"font-size: 12px;\">诚邀入驻</span></strong></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">若认识舞厅经营者，可推荐入驻：添加客服微信提交资料，客服帮你上传，或者直接舞厅百事通平台主页申请入驻，商家能随时更新营业时间、发布活动，方便爱好者安排。</span></p><p style=\"overflow-wrap: break-word;\"><br/></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\"><strong>便捷管理</strong></span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">管理人员可一站式操作：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 修改营业时间、收费等信息</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 展示联系方式、方便爱好者联系；</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">✅ 上传图片自定义页面，凸显舞厅特色。</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">加入我们，共建高效贴心的文化休闲平台！</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">舞厅百事通官方客服：</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服一号：AB188ABE</span></p><p style=\"overflow-wrap: break-word;\"><span style=\"font-size: 12px;\">客服二号：AB168ABE</span></p><p><br/></p><p><br/></p>",
+      "stars": 5,
+      "isCollection": 0,
+      "comment": "0",
+      "qrcode": "https://wxyyh.tdotapp.com/upload/depot/i1u6fsvy43/20260206/ia0telr8mz2m6zi4.jpg",
+      "payQrcode": "",
+      "vrurl": "",
+      "notice": [],
+      "goodsStyle": 1,
+      "recommendShops": [],
+      "listLabel": "",
+      "show_num": "1.6万",
+      "showComment": 1,
+      "openStatus": "1",
+      "shareCover": "",
+      "mp4url": "",
+      "isbuy": 0,
+      "limitOpen": 0,
+      "groupOpen": 0,
+      "bargainOpen": 0,
+      "openNote": "营业中",
+      "canClaim": 1,
+      "claimId": 0,
+      "newCategory": [],
+      "activityList": []
+    }
+  ],
+  "timesec": 1777622144,
+  "ec": 200,
+  "em": ""
+}
+
+
+陕西省查询
+curl -X GET 'https://wxyyh.tdotapp.com/applet.php?suid=i1u6fsvy43&appid=wxc7a769f9108b190d&system=android&plum_session_applet=inhl062ig3nnas5icd4fh10ete&map=applet_city_new_shop_list&type=nearby&category=255487&page=0&lng=103.85590362548828&lat=30.681440353393555' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf254186b) XWEB/19481' -H 'xweb_xhr: 1' -H 'Content-Type: application/json' -H 'Sec-Fetch-Site: cross-site' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Dest: empty' -H 'Referer: https://servicewechat.com/wxc7a769f9108b190d/7/page-frame.html' -H 'Accept-Language: zh-CN,zh;q=0.9' --http1.1
