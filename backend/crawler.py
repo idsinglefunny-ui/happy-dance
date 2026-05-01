@@ -1,6 +1,18 @@
 import requests
 import json
 import time
+import pymysql
+
+# 数据库配置
+DB_CONFIG = {
+    'host': '117.72.76.53',
+    'port': 63306,
+    'user': 'king_dancer_go',
+    'password': 'KingDance_._334456',
+    'database': 'king_dance',
+    'charset': 'utf8mb4',
+    'cursorclass': pymysql.cursors.DictCursor
+}
 
 # 舞图图的固定伪装头
 HEADERS = {
@@ -21,7 +33,12 @@ def fetch_overview(open_status=1):
         response = requests.get(url, headers=HEADERS, timeout=10)
         data = response.json()
         if data.get('code') == 200:
-            return data['data'].get('danceHallList', [])
+            result = []
+            # API returns a dict: {"CityName": [hall1, hall2], ...}
+            for key, halls in data.get('data', {}).items():
+                if isinstance(halls, list):
+                    result.extend(halls)
+            return result
         else:
             print(f"[Error] 获取 {open_status} 状态列表失败: {data}")
             return []
@@ -44,38 +61,111 @@ def fetch_detail(hall_id):
         print(f"[Exception] 详情请求失败 {hall_id}: {e}")
         return None
 
-def trigger_sync(is_manual=False):
+def sync_data(is_manual=False):
     """
-    触发数据同步 (此函数既可以被Crontab定时调用，也可以被前端管理后台的API手动触发)
+    数据抓取与入库同步主逻辑
     """
     trigger_type = "手动触发" if is_manual else "定时任务触发"
     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] 开始同步数据 ({trigger_type})...")
     
-    # 1. 抓取所有营业舞厅
-    open_halls = fetch_overview(open_status=1)
-    print(f" -> 抓取到 {len(open_halls)} 个营业中的舞厅。")
+    # 建立数据库连接
+    connection = pymysql.connect(**DB_CONFIG)
     
-    # 2. 抓取所有停业舞厅
-    closed_halls = fetch_overview(open_status=0)
-    print(f" -> 抓取到 {len(closed_halls)} 个停业的舞厅。")
-    
-    all_halls = open_halls + closed_halls
-    
-    # 在真实环境中，这里会执行如下逻辑：
-    # 1. 将上面拉取到的ID与数据库对比，更新 status
-    # 2. 如果发现有新ID，调用 fetch_detail(id) 并 INSERT 进数据库
-    
-    # 演示：抓取第一个舞厅的详情看看格式
-    if all_halls:
-        sample_id = all_halls[0].get('id')
-        print(f" -> 正在获取样本舞厅ID ({sample_id}) 的详细数据...")
-        detail = fetch_detail(sample_id)
-        if detail:
-            print(f" -> 详情获取成功: {detail.get('name')} | 票价: {detail.get('ticket')}")
+    try:
+        with connection.cursor() as cursor:
+            # 1. 抓取所有舞厅
+            open_halls = fetch_overview(open_status=1)
+            for h in open_halls:
+                h['derived_status'] = 1
+                
+            closed_halls = fetch_overview(open_status=0)
+            for h in closed_halls:
+                h['derived_status'] = 0
+                
+            all_halls = open_halls + closed_halls
+            print(f" -> 接口共返回 {len(all_halls)} 个舞厅。")
+            
+            # 为了测试速度，如果是大量数据，这里需要控制频率，或者只抓取未入库的详情
+            # MVP版本我们遍历所有的 ID 更新状态并入库
+            success_count = 0
+            
+            for index, hall_overview in enumerate(all_halls):
+                hall_id = hall_overview.get('id')
+                status = hall_overview.get('derived_status', 0)
+                hot = hall_overview.get('hot', 0)
+                
+                # 获取详细信息
+                detail = fetch_detail(hall_id)
+                if not detail:
+                    continue
+                    
+                # 准备入库字段
+                name = detail.get('name', '')
+                province = detail.get('province', '')
+                city = detail.get('city', '')
+                address = detail.get('address', '')
+                longitude = detail.get('longitude', 0)
+                latitude = detail.get('latitude', 0)
+                
+                morning_hours = detail.get('morningOpenCloseTime', '')
+                afternoon_hours = detail.get('noonOpenCloseTime', '')
+                evening_hours = detail.get('eveningOpenCloseTime', '')
+                ticket_price = detail.get('ticket', '')
+                moment_text = detail.get('moment', '')
+                
+                # 插入或更新 SQL
+                sql = """
+                INSERT INTO `dance_halls` (
+                    `id`, `name`, `province`, `city`, `address`, 
+                    `longitude`, `latitude`, `location`,
+                    `open_status`, `hot`, 
+                    `morning_hours`, `afternoon_hours`, `evening_hours`,
+                    `ticket_price`, `moment_text`
+                ) VALUES (
+                    %s, %s, %s, %s, %s,
+                    %s, %s, ST_GeomFromText(%s, 4326),
+                    %s, %s,
+                    %s, %s, %s,
+                    %s, %s
+                )
+                ON DUPLICATE KEY UPDATE
+                    `name`=VALUES(`name`), `province`=VALUES(`province`), `city`=VALUES(`city`),
+                    `address`=VALUES(`address`),
+                    `longitude`=VALUES(`longitude`), `latitude`=VALUES(`latitude`),
+                    `location`=VALUES(`location`),
+                    `open_status`=VALUES(`open_status`), `hot`=VALUES(`hot`),
+                    `morning_hours`=VALUES(`morning_hours`), `afternoon_hours`=VALUES(`afternoon_hours`), `evening_hours`=VALUES(`evening_hours`),
+                    `ticket_price`=VALUES(`ticket_price`), `moment_text`=VALUES(`moment_text`)
+                """
+                
+                # MySQL 8.0 中 SRID 4326 的格式要求为 POINT(latitude longitude)
+                point_str = f"POINT({latitude} {longitude})"
+                
+                try:
+                    cursor.execute(sql, (
+                        hall_id, name, province, city, address,
+                        longitude, latitude, point_str,
+                        status, hot,
+                        morning_hours, afternoon_hours, evening_hours,
+                        ticket_price, moment_text
+                    ))
+                    success_count += 1
+                    
+                    if index > 0 and index % 10 == 0:
+                        print(f" -> 已处理 {index}/{len(all_halls)} 个舞厅")
+                        connection.commit()
+                        
+                except Exception as db_err:
+                    print(f"[DB Error] 插入/更新 {hall_id} 失败: {db_err}")
+                
+                # 降低抓取频率防止风控
+                time.sleep(0.5)
 
-    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] 同步任务执行完毕。\n")
-    return {"status": "success", "synced_count": len(all_halls)}
+            connection.commit()
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] 成功更新 {success_count} 条记录到数据库。")
+            
+    finally:
+        connection.close()
 
 if __name__ == "__main__":
-    # 本地测试可以直接运行此脚本
-    trigger_sync(is_manual=True)
+    sync_data(is_manual=True)
