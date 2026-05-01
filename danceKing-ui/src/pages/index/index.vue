@@ -15,7 +15,7 @@
         <text class="nav-icon">✨</text>
         <text class="nav-text">认领舞厅</text>
       </view>
-      <view class="nav-item">
+      <view class="nav-item" @click="goToTimer">
         <text class="nav-icon">⏱️</text>
         <text class="nav-text">专属计时</text>
       </view>
@@ -79,6 +79,10 @@ const fetchVenues = () => {
 
 const goToClaim = () => {
   uni.navigateTo({ url: '/pages/claim/claim' });
+};
+
+const goToTimer = () => {
+  uni.navigateTo({ url: '/pages/timer/timer' });
 };
 
 onMounted(() => {

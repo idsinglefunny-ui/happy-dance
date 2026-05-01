@@ -23,6 +23,14 @@
 				"navigationBarBackgroundColor": "#0b0b0e",
 				"navigationBarTextStyle": "white"
 			}
+		},
+		{
+			"path": "pages/timer/timer",
+			"style": {
+				"navigationBarTitleText": "专属计时",
+				"navigationBarBackgroundColor": "#0b0b0e",
+				"navigationBarTextStyle": "white"
+			}
 		}
 	],
 	"globalStyle": {
