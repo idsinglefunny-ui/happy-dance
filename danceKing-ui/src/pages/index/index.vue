@@ -116,7 +116,7 @@ const setFilter = (filterName) => {
 const fetchVenues = () => {
   // 模拟请求，真实环境中使用 uni.getLocation 获取经纬度
   uni.request({
-    url: 'http://localhost:8080/api/dance-halls',
+    url: 'http://localhost:12800/api/dance-halls',
     data: { latitude: 30.6586, longitude: 104.0648 },
     success: (res) => {
       if(res.data && res.data.code === 200) {

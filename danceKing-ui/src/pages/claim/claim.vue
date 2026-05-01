@@ -89,7 +89,7 @@ const chooseImage = () => {
 const submitForm = (e) => {
   const data = e.detail.value;
   uni.request({
-    url: 'http://localhost:8080/api/claims',
+    url: 'http://localhost:12800/api/claims',
     method: 'POST',
     data: data,
     success: (res) => {
