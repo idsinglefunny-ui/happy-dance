@@ -65,7 +65,7 @@ const reject = (id) => {
 const triggerSync = async () => {
   syncing.value = true;
   try {
-    const res = await axios.post('http://localhost:8000/api/admin/trigger-sync');
+    const res = await axios.post('http://localhost:8080/api/admin/trigger-sync');
     if (res.data && res.data.code === 200) {
       showToast(`同步成功: 更新了 ${res.data.data.synced_count} 家舞厅`);
     } else {
