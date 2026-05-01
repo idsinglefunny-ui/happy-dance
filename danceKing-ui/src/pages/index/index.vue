@@ -26,15 +26,16 @@
     </view>
 
     <!-- Filter -->
-    <view class="filter-section">
-      <view class="filter-btn active">全部</view>
-      <view class="filter-btn">今日营业</view>
-      <view class="filter-btn">今日停业</view>
+    <view class="filter-section scroll-x">
+      <view :class="['filter-btn', currentFilter === 'all' ? 'active' : '']" @click="setFilter('all')">全部</view>
+      <view :class="['filter-btn', currentFilter === 'open' ? 'active' : '']" @click="setFilter('open')">今日营业</view>
+      <view :class="['filter-btn', currentFilter === 'closed' ? 'active' : '']" @click="setFilter('closed')">今日停业</view>
+      <view :class="['filter-btn', currentFilter === 'hot' ? 'active' : '']" @click="setFilter('hot')">🔥热门</view>
     </view>
 
     <!-- Venue List -->
     <view class="venue-list">
-      <view class="venue-card" v-for="(venue, index) in venues" :key="index">
+      <view class="venue-card" v-for="(venue, index) in filteredVenues" :key="index">
         <view class="card-header">
           <text class="venue-name">{{ venue.name }}</text>
           <view :class="['status-tag', venue.open_status ? 'status-open' : 'status-closed']">
@@ -60,9 +61,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 const venues = ref([]);
+const currentFilter = ref('all');
+
+const filteredVenues = computed(() => {
+  if (currentFilter.value === 'all') return venues.value;
+  if (currentFilter.value === 'open') return venues.value.filter(v => v.open_status === 1);
+  if (currentFilter.value === 'closed') return venues.value.filter(v => v.open_status === 0);
+  if (currentFilter.value === 'hot') return venues.value.filter(v => v.hot === 1);
+  return venues.value;
+});
+
+const setFilter = (filterName) => {
+  currentFilter.value = filterName;
+};
 
 const fetchVenues = () => {
   // 模拟请求，真实环境中使用 uni.getLocation 获取经纬度
@@ -141,6 +155,8 @@ page {
   display: flex;
   padding: 0 24rpx;
   margin-bottom: 20rpx;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 .filter-btn {
   padding: 10rpx 30rpx;
@@ -149,6 +165,7 @@ page {
   color: #888;
   font-size: 26rpx;
   margin-right: 20rpx;
+  flex-shrink: 0;
 }
 .filter-btn.active {
   background: #e5007f;
