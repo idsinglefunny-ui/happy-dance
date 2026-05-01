@@ -25,6 +25,35 @@
       </button>
     </view>
 
+    <!-- Real-time Marquee / Bullet Screen -->
+    <view class="marquee-section">
+      <view class="marquee-header">
+        <view class="marquee-title">
+          <text class="dot"></text>
+          <text>全国舞厅实时弹幕</text>
+        </view>
+        <view class="marquee-actions">
+          <text class="action-btn report-btn">我要上报</text>
+          <text class="action-btn">查看全部 ></text>
+        </view>
+      </view>
+      <swiper class="marquee-swiper" vertical autoplay circular interval="3000" :show-indicators="false">
+        <swiper-item v-for="(item, idx) in marqueeList" :key="idx">
+          <view class="marquee-content">
+            <view class="marquee-main">
+              <text class="marquee-date">{{ item.date }}</text>
+              <text class="marquee-text">{{ item.text }}</text>
+            </view>
+            <view class="marquee-user">
+              <view class="user-avatar"></view>
+              <text class="user-name">{{ item.user }}</text>
+              <text class="marquee-time">{{ item.time }}</text>
+            </view>
+          </view>
+        </swiper-item>
+      </swiper>
+    </view>
+
     <!-- Filter -->
     <view class="filter-section scroll-x">
       <view :class="['filter-btn', currentFilter === 'all' ? 'active' : '']" @click="setFilter('all')">全部</view>
@@ -65,6 +94,12 @@ import { ref, computed, onMounted } from 'vue';
 
 const venues = ref([]);
 const currentFilter = ref('all');
+
+const marqueeList = ref([
+  { date: '05-01', text: '星海壹号 下午 暂停营业', user: '悉达多', time: '12:30' },
+  { date: '05-01', text: '迪乐汇歌舞厅 晚场满场，气氛极佳！', user: '舞王', time: '14:05' },
+  { date: '05-01', text: '金卡罗 临时停业，大家别跑空了', user: '匿名用户', time: '15:20' }
+]);
 
 const filteredVenues = computed(() => {
   if (currentFilter.value === 'all') return venues.value;
@@ -151,6 +186,93 @@ page {
   font-size: 24rpx;
   color: #aaaaaa;
 }
+
+/* Marquee / Bullet Screen Styles */
+.marquee-section {
+  background: #15151e;
+  margin: 0 24rpx 30rpx;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  border: 1px solid #2a2a36;
+}
+.marquee-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.marquee-title {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  background: #e5007f;
+  border-radius: 50%;
+  margin-right: 12rpx;
+  box-shadow: 0 0 10rpx #e5007f;
+}
+.marquee-actions {
+  display: flex;
+  align-items: center;
+}
+.action-btn {
+  font-size: 24rpx;
+  color: #888888;
+  margin-left: 20rpx;
+}
+.report-btn {
+  background: #2a2a36;
+  color: #e5007f;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}
+.marquee-swiper {
+  height: 120rpx;
+  background: #1e1e28;
+  border-radius: 12rpx;
+}
+.marquee-content {
+  padding: 20rpx;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.marquee-main {
+  font-size: 28rpx;
+  color: #dddddd;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.marquee-date {
+  color: #e5007f;
+  margin-right: 10rpx;
+}
+.marquee-user {
+  display: flex;
+  align-items: center;
+  font-size: 22rpx;
+  color: #888888;
+}
+.user-avatar {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e5007f, #9900ff);
+  margin-right: 10rpx;
+}
+.marquee-time {
+  margin-left: auto;
+}
+
 .filter-section {
   display: flex;
   padding: 0 24rpx;
