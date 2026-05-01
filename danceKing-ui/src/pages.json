@@ -15,6 +15,14 @@
 				"navigationBarBackgroundColor": "#0b0b0e",
 				"navigationBarTextStyle": "white"
 			}
+		},
+		{
+			"path": "pages/my/my",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"navigationBarBackgroundColor": "#0b0b0e",
+				"navigationBarTextStyle": "white"
+			}
 		}
 	],
 	"globalStyle": {
@@ -31,6 +39,10 @@
             {
                 "pagePath": "pages/index/index",
                 "text": "首页"
+            },
+            {
+                "pagePath": "pages/my/my",
+                "text": "我的"
             }
         ]
     }
