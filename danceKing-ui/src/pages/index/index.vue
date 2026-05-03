@@ -21,26 +21,18 @@
     </view>
 
     <!-- Real-time Marquee / Bullet Screen -->
-    <view class="marquee-section">
-      <view class="marquee-header">
-        <view class="marquee-title">
-          <text class="dot"></text>
-          <text>实时弹幕区</text>
-        </view>
-        <view class="marquee-actions">
-          <text class="action-btn">查看全部 →</text>
+    <view class="marquee-container">
+      <view class="marquee-label">
+        <text class="dot"></text>
+        <text>最新动态</text>
+      </view>
+      <view class="marquee-box">
+        <view class="marquee-track">
+          <text class="marquee-item" v-for="(item, idx) in marqueeList" :key="idx">
+            【{{ item.date }}】{{ item.text }}
+          </text>
         </view>
       </view>
-      <swiper class="marquee-swiper" vertical autoplay circular interval="3000" :show-indicators="false">
-        <swiper-item v-for="(item, idx) in marqueeList" :key="idx">
-          <view class="marquee-content">
-            <view class="marquee-main">
-              <text class="marquee-date">{{ item.date }}</text>
-              <text class="marquee-text">{{ item.text }}</text>
-            </view>
-          </view>
-        </swiper-item>
-      </swiper>
     </view>
 
     <!-- Filter -->
@@ -247,91 +239,57 @@ page {
 }
 
 /* Marquee / Bullet Screen Styles */
-.marquee-section {
-  background: #ffffff;
-  margin: 0 24rpx 30rpx;
-  border-radius: 20rpx;
-  padding: 24rpx;
+.marquee-container {
+  display: flex;
+  align-items: center;
+  background: #f9fafb;
   border: 1px solid #e5e7eb;
+  margin: 0 24rpx 30rpx;
+  padding: 16rpx 24rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
 }
-.marquee-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
-.marquee-title {
+.marquee-label {
   display: flex;
   align-items: center;
-  font-size: 28rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #111827;
+  margin-right: 20rpx;
+  white-space: nowrap;
 }
 .dot {
-  width: 14rpx;
-  height: 14rpx;
+  width: 12rpx;
+  height: 12rpx;
   background: #10b981;
   border-radius: 50%;
-  margin-right: 14rpx;
-}
-.marquee-actions {
-  display: flex;
-  align-items: center;
-}
-.action-btn {
-  font-size: 24rpx;
-  color: #6b7280;
-  margin-left: 20rpx;
-}
-.report-btn {
-  background: #f3f4f6;
-  color: #374151;
-  padding: 6rpx 20rpx;
-  border-radius: 30rpx;
-  border: 1px solid #d1d5db;
-}
-.marquee-swiper {
-  height: 130rpx;
-  background: #f9fafb;
-  border-radius: 16rpx;
-  border: 1px solid #e5e7eb;
-}
-.marquee-content {
-  padding: 24rpx;
-  height: 100%;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.marquee-main {
-  font-size: 28rpx;
-  color: #374151;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.marquee-date {
-  color: #2563eb;
-  margin-right: 14rpx;
-  font-weight: bold;
-}
-.marquee-user {
-  display: flex;
-  align-items: center;
-  font-size: 24rpx;
-  color: #6b7280;
-}
-.user-avatar {
-  width: 32rpx;
-  height: 32rpx;
-  border-radius: 50%;
-  background: #e5e7eb;
   margin-right: 12rpx;
 }
-.marquee-time {
-  margin-left: auto;
+.marquee-box {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+}
+.marquee-track {
+  display: flex;
+  white-space: nowrap;
+  animation: scroll-text 15s linear infinite;
+}
+.marquee-item {
+  font-size: 26rpx;
+  color: #374151;
+  margin-right: 80rpx;
+}
+@keyframes scroll-text {
+  0% {
+    transform: translateX(450rpx);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .filter-section {
