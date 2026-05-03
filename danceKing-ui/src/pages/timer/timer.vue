@@ -1,11 +1,21 @@
 <template>
   <view class="container">
     <view class="config-card">
-      <view class="config-row picker-row">
+      <view class="config-row picker-row" style="position: relative;">
         <text class="label">计费模式：</text>
-        <picker :range="modes" :value="modeIndex" @change="onModeChange" class="picker-box">
-          <view class="picker-text">{{ modes[modeIndex] }}</view>
-        </picker>
+        <view class="picker-box" @click="isDropdownOpen = !isDropdownOpen">
+          <text class="picker-text">{{ modes[modeIndex] }}</text>
+          <text class="dropdown-arrow">▼</text>
+        </view>
+        <!-- Custom Inline Dropdown Menu -->
+        <view class="custom-dropdown" v-if="isDropdownOpen">
+          <view class="dropdown-item" 
+                v-for="(mode, index) in modes" 
+                :key="index"
+                @click="selectMode(index)">
+            {{ mode }}
+          </view>
+        </view>
       </view>
     </view>
 
@@ -101,8 +111,10 @@ const elapsedMs = ref(0);
 const songRecords = ref([]);
 let timerInterval = null;
 
-const onModeChange = (e) => {
-  modeIndex.value = e.detail.value;
+const isDropdownOpen = ref(false);
+const selectMode = (index) => {
+  modeIndex.value = index;
+  isDropdownOpen.value = false;
 };
 
 const formatTime = (dateObj) => {
@@ -246,10 +258,42 @@ page {
   border-radius: 12rpx;
   margin-left: 20rpx;
   border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dropdown-arrow {
+  font-size: 20rpx;
+  color: #6b7280;
+  margin-left: 10rpx;
 }
 .picker-text {
   font-size: 28rpx;
   color: #111827;
+}
+.custom-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 170rpx;
+  right: 0;
+  background: #ffffff;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  z-index: 100;
+  margin-top: 8rpx;
+}
+.dropdown-item {
+  padding: 24rpx 32rpx;
+  font-size: 28rpx;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+}
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+.dropdown-item:active {
+  background: #f9fafb;
 }
 .input-group {
   display: flex;
