@@ -125,8 +125,19 @@ const fetchVenues = (page = 1) => {
     }
   });
 };
+const fetchReports = () => {
+  uni.request({
+    url: 'http://localhost:12800/api/reports',
+    success: (res) => {
+      if (res.data && res.data.code === 200 && res.data.data) {
+        marqueeList.value = res.data.data;
+      }
+    }
+  });
+};
 
 onMounted(() => {
+  fetchReports();
   fetchVenues(1);
 });
 
