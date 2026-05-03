@@ -20,6 +20,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def init_reports_table():
+    try:
+        conn = pymysql.connect(**crawler.DB_CONFIG)
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS dance_hall_reports (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    venue_name VARCHAR(100),
+                    report_text VARCHAR(255),
+                    reporter_name VARCHAR(50),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            # Insert some initial demo reports if table is empty
+            cursor.execute("SELECT COUNT(*) as cnt FROM dance_hall_reports")
+            if cursor.fetchone()['cnt'] == 0:
+                cursor.executemany("""
+                    INSERT INTO dance_hall_reports (venue_name, report_text, reporter_name)
+                    VALUES (%s, %s, %s)
+                """, [
+                    ("星海壹号", "05-01 星海壹号 下午 暂停营业", "悉达多"),
+                    ("迪乐汇歌舞厅", "05-01 迪乐汇歌舞厅 晚场满场，气氛极佳！", "舞王"),
+                    ("金卡罗", "05-01 金卡罗 临时停业，大家别跑空了", "匿名用户")
+                ])
+            conn.commit()
+        conn.close()
+    except Exception as e:
+        print("Failed to initialize reports table:", e)
+
+init_reports_table()
+
 def get_db():
     conn = pymysql.connect(**crawler.DB_CONFIG)
     try:
@@ -31,27 +62,48 @@ def get_db():
 def get_nearby_dance_halls(
     latitude: float = Query(..., description="User latitude"),
     longitude: float = Query(..., description="User longitude"),
+    page: int = Query(1, description="Page number", ge=1),
+    page_size: int = Query(20, description="Items per page", ge=1, le=100),
+    open_status: int = Query(None, description="Filter by open status"),
+    hot: int = Query(None, description="Filter by hot status"),
     db: pymysql.connections.Connection = Depends(get_db)
 ):
     """获取附近的舞厅，按距离排序"""
     try:
         with db.cursor() as cursor:
-            # ST_Distance_Sphere 计算距离 (单位: 米)
-            sql = """
+            # Build query with optional filters
+            where_clauses = []
+            params = []
+            
+            # Distance
+            point_str = f"POINT({latitude} {longitude})"
+            where_clauses.append("1=1")
+            
+            if open_status is not None:
+                where_clauses.append("open_status = %s")
+                params.append(open_status)
+                
+            if hot is not None:
+                where_clauses.append("hot = %s")
+                params.append(hot)
+
+            where_str = " AND ".join(where_clauses)
+            
+            sql = f"""
                 SELECT 
-                    id, name, province, city, address, open_status, hot,
+                    id, name, province, city, address, open_status, hot, cover,
                     morning_hours, afternoon_hours, evening_hours, ticket_price, moment_text,
                     ST_Distance_Sphere(location, ST_GeomFromText(%s, 4326)) as distance_m
                 FROM dance_halls
+                WHERE {where_str}
                 ORDER BY distance_m ASC
-                LIMIT 50
+                LIMIT %s OFFSET %s
             """
-            # MySQL 8.0 SRID 4326: POINT(latitude longitude)
-            point_str = f"POINT({latitude} {longitude})"
-            cursor.execute(sql, (point_str,))
+            offset = (page - 1) * page_size
+            params_for_execute = [point_str] + params + [page_size, offset]
+            cursor.execute(sql, params_for_execute)
             results = cursor.fetchall()
             
-            # 格式化距离供前端展示
             for r in results:
                 dist = r['distance_m']
                 if dist is not None:
@@ -64,6 +116,7 @@ def get_nearby_dance_halls(
             return {"code": 200, "data": results}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 class ClaimRequest(BaseModel):
     venue_name: str
@@ -103,6 +156,87 @@ def admin_trigger_sync():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/dance-halls/{hall_id}")
+def get_dance_hall_detail(
+    hall_id: int,
+    latitude: float = Query(None, description="User latitude"),
+    longitude: float = Query(None, description="User longitude"),
+    db: pymysql.connections.Connection = Depends(get_db)
+):
+    """获取指定舞厅的详情"""
+    try:
+        with db.cursor() as cursor:
+            if latitude is not None and longitude is not None:
+                sql = """
+                    SELECT 
+                        id, name, province, city, address, open_status, hot, cover,
+                        morning_hours, afternoon_hours, evening_hours, ticket_price, moment_text,
+                        longitude, latitude,
+                        ST_Distance_Sphere(location, ST_GeomFromText(%s, 4326)) as distance_m
+                    FROM dance_halls
+                    WHERE id = %s
+                """
+                point_str = f"POINT({latitude} {longitude})"
+                cursor.execute(sql, (point_str, hall_id))
+            else:
+                sql = """
+                    SELECT 
+                        id, name, province, city, address, open_status, hot, cover,
+                        morning_hours, afternoon_hours, evening_hours, ticket_price, moment_text,
+                        longitude, latitude, NULL as distance_m
+                    FROM dance_halls
+                    WHERE id = %s
+                """
+                cursor.execute(sql, (hall_id,))
+            result = cursor.fetchone()
+            if not result:
+                raise HTTPException(status_code=404, detail="Dance hall not found")
+                
+            dist = result.get('distance_m')
+            if dist is not None:
+                if dist < 1000:
+                    result['distance_display'] = f"{int(dist)}m"
+                else:
+                    result['distance_display'] = f"{dist/1000:.1f}km"
+            else:
+                result['distance_display'] = "未知"
+                
+            return {"code": 200, "data": result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=12800, reload=True)
+
+@app.get("/api/reports")
+def get_reports(db: pymysql.connections.Connection = Depends(get_db)):
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("SELECT venue_name, report_text, reporter_name as user, DATE_FORMAT(created_at, '%H:%i') as time, DATE_FORMAT(created_at, '%m-%d') as date FROM dance_hall_reports ORDER BY id DESC LIMIT 20")
+            results = cursor.fetchall()
+            return {"code": 200, "data": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class ReportCreate(BaseModel):
+    venue_name: str
+    report_text: str
+    reporter_name: str
+
+@app.post("/api/reports")
+def create_report(report: ReportCreate, db: pymysql.connections.Connection = Depends(get_db)):
+    try:
+        with db.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO dance_hall_reports (venue_name, report_text, reporter_name) VALUES (%s, %s, %s)",
+                (report.venue_name, report.report_text, report.reporter_name)
+            )
+            db.commit()
+            return {"code": 200, "message": "上报成功"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+

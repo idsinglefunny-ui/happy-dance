@@ -2,15 +2,14 @@
   <view class="container">
     <!-- Top Banner -->
     <view class="banner">
-      <image class="banner-img" src="https://via.placeholder.com/750x300/1a1a24/e5007f?text=YOUR+BANNER+AD" mode="aspectFill"></image>
+      <view class="banner-gradient">
+        <text class="banner-title">全国最火爆的莎莎舞厅</text>
+        <text class="banner-subtitle">探索全国舞讯 · 计时体验升级</text>
+      </view>
     </view>
 
     <!-- Quick Navigation -->
     <view class="nav-grid">
-      <view class="nav-item">
-        <text class="nav-icon">🌍</text>
-        <text class="nav-text">全国舞讯</text>
-      </view>
       <view class="nav-item" @click="goToClaim">
         <text class="nav-icon">✨</text>
         <text class="nav-text">认领舞厅</text>
@@ -19,10 +18,6 @@
         <text class="nav-icon">⏱️</text>
         <text class="nav-text">专属计时</text>
       </view>
-      <button class="nav-item contact-btn" open-type="contact">
-        <text class="nav-icon">💬</text>
-        <text class="nav-text">在线客服</text>
-      </button>
     </view>
 
     <!-- Real-time Marquee / Bullet Screen -->
@@ -30,11 +25,10 @@
       <view class="marquee-header">
         <view class="marquee-title">
           <text class="dot"></text>
-          <text>全国舞厅实时弹幕</text>
+          <text>实时弹幕区</text>
         </view>
         <view class="marquee-actions">
-          <text class="action-btn report-btn">我要上报</text>
-          <text class="action-btn">查看全部 ></text>
+          <text class="action-btn">查看全部 →</text>
         </view>
       </view>
       <swiper class="marquee-swiper" vertical autoplay circular interval="3000" :show-indicators="false">
@@ -43,11 +37,6 @@
             <view class="marquee-main">
               <text class="marquee-date">{{ item.date }}</text>
               <text class="marquee-text">{{ item.text }}</text>
-            </view>
-            <view class="marquee-user">
-              <view class="user-avatar"></view>
-              <text class="user-name">{{ item.user }}</text>
-              <text class="marquee-time">{{ item.time }}</text>
             </view>
           </view>
         </swiper-item>
@@ -59,22 +48,21 @@
       <view :class="['filter-btn', currentFilter === 'all' ? 'active' : '']" @click="setFilter('all')">全部</view>
       <view :class="['filter-btn', currentFilter === 'open' ? 'active' : '']" @click="setFilter('open')">今日营业</view>
       <view :class="['filter-btn', currentFilter === 'closed' ? 'active' : '']" @click="setFilter('closed')">今日停业</view>
-      <view :class="['filter-btn', currentFilter === 'hot' ? 'active' : '']" @click="setFilter('hot')">🔥热门</view>
+      <view :class="['filter-btn', currentFilter === 'hot' ? 'active' : '']" @click="setFilter('hot')">🔥 热门</view>
     </view>
 
     <!-- Venue List -->
     <view class="venue-list">
-      <view class="venue-card" v-for="(venue, index) in filteredVenues" :key="index">
+      <view class="venue-card" v-for="(venue, index) in filteredVenues" :key="index" @click="goToDetail(venue.id)">
         <view class="card-header">
           <text class="venue-name">{{ venue.name }}</text>
           <view :class="['status-tag', venue.open_status ? 'status-open' : 'status-closed']">
-            {{ venue.open_status ? 'OPEN NOW' : 'CLOSED' }}
+            {{ venue.open_status ? '营业中' : '休息中' }}
           </view>
         </view>
         
         <view class="card-body">
-          <text class="venue-hours">{{ venue.afternoon_hours }} / {{ venue.evening_hours }}</text>
-          <text class="venue-notice" v-if="venue.moment_text">{{ venue.moment_text }}</text>
+          <text class="venue-hours">营业时间: {{ venue.afternoon_hours || '下午场' }} / {{ venue.evening_hours || '晚场' }}</text>
         </view>
         
         <view class="card-footer">
@@ -85,83 +73,154 @@
           </view>
         </view>
       </view>
+
+      <!-- Pagination / Loading States -->
+      <view class="loading-state" v-if="venues.length > 0">
+        <text v-if="hasMore">正在加载更多...</text>
+        <text v-else>已加载全部数据</text>
+      </view>
     </view>
   </view>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { onReachBottom } from '@dcloudio/uni-app';
 
 const venues = ref([]);
 const currentFilter = ref('all');
+const currentPage = ref(1);
+const hasMore = ref(true);
 
 const marqueeList = ref([
-  { date: '05-01', text: '星海壹号 下午 暂停营业', user: '悉达多', time: '12:30' },
-  { date: '05-01', text: '迪乐汇歌舞厅 晚场满场，气氛极佳！', user: '舞王', time: '14:05' },
-  { date: '05-01', text: '金卡罗 临时停业，大家别跑空了', user: '匿名用户', time: '15:20' }
+  { date: '05-01', text: '金卡罗 临时停业，大家别跑空了', user: '悉达多', time: '1分钟前' },
+  { date: '05-01', text: '迪乐汇歌舞厅 晚场满场，气氛极佳！', user: '舞王', time: '5分钟前' },
+  { date: '05-01', text: '星海壹号 下午 暂停营业', user: '匿名用户', time: '10分钟前' }
 ]);
 
-const filteredVenues = computed(() => {
-  if (currentFilter.value === 'all') return venues.value;
-  if (currentFilter.value === 'open') return venues.value.filter(v => v.open_status === 1);
-  if (currentFilter.value === 'closed') return venues.value.filter(v => v.open_status === 0);
-  if (currentFilter.value === 'hot') return venues.value.filter(v => v.hot === 1);
-  return venues.value;
-});
+const fetchVenues = (page = 1) => {
+  const params = {
+    page: page,
+    page_size: 10,
+    latitude: 30.6586,
+    longitude: 104.0648
+  };
+  if (currentFilter.value === 'open') {
+    params.open_status = 1;
+  } else if (currentFilter.value === 'closed') {
+    params.open_status = 0;
+  } else if (currentFilter.value === 'hot') {
+    params.hot = 1;
+  }
 
-const setFilter = (filterName) => {
-  currentFilter.value = filterName;
-};
-
-const fetchVenues = () => {
-  // 模拟请求，真实环境中使用 uni.getLocation 获取经纬度
   uni.request({
     url: 'http://localhost:12800/api/dance-halls',
-    data: { latitude: 30.6586, longitude: 104.0648 },
+    data: params,
     success: (res) => {
-      if(res.data && res.data.code === 200) {
-        venues.value = res.data.data;
+      if (res.data && res.data.code === 200) {
+        const newData = res.data.data || [];
+        if (page === 1) {
+          venues.value = newData;
+        } else {
+          venues.value = [...venues.value, ...newData];
+        }
+        if (newData.length < 10) {
+          hasMore.value = false;
+        } else {
+          hasMore.value = true;
+        }
       }
     }
   });
 };
 
-const goToClaim = () => {
-  uni.navigateTo({ url: '/pages/claim/claim' });
+onMounted(() => {
+  fetchVenues(1);
+});
+
+onReachBottom(() => {
+  if (hasMore.value) {
+    currentPage.value += 1;
+    fetchVenues(currentPage.value);
+  }
+});
+
+const setFilter = (type) => {
+  currentFilter.value = type;
+  currentPage.value = 1;
+  hasMore.value = true;
+  venues.value = [];
+  fetchVenues(1);
+};
+
+const goToDetail = (id) => {
+  if(id) {
+    uni.navigateTo({
+      url: `/pages/detail/detail?id=${id}`
+    });
+  }
 };
 
 const goToTimer = () => {
-  uni.navigateTo({ url: '/pages/timer/timer' });
+  uni.navigateTo({
+    url: '/pages/timer/timer'
+  });
 };
 
-onMounted(() => {
-  fetchVenues();
+const goToClaim = () => {
+  uni.navigateTo({
+    url: '/pages/claim/claim'
+  });
+};
+
+const filteredVenues = computed(() => {
+  return venues.value;
 });
 </script>
 
 <style>
 page {
-  background-color: #0b0b0e;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #1f2937;
 }
 .container {
   padding-bottom: 40rpx;
+  background-color: #ffffff;
 }
 .banner {
   width: 100%;
-  height: 300rpx;
-  background: #1a1a24;
+  height: 240rpx;
+  background: #f3f4f6;
+  position: relative;
+  overflow: hidden;
 }
-.banner-img {
+.banner-gradient {
   width: 100%;
   height: 100%;
+  padding: 40rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.banner-title {
+  font-size: 38rpx;
+  font-weight: bold;
+  color: #111827;
+  letter-spacing: 2rpx;
+  margin-bottom: 12rpx;
+}
+.banner-subtitle {
+  font-size: 24rpx;
+  color: #6b7280;
 }
 .nav-grid {
   display: flex;
   justify-content: space-around;
-  padding: 30rpx 0;
-  background-color: #111118;
-  margin-bottom: 20rpx;
+  padding: 36rpx 20rpx;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24rpx;
 }
 .nav-item {
   display: flex;
@@ -179,21 +238,21 @@ page {
   display: none;
 }
 .nav-icon {
-  font-size: 50rpx;
-  margin-bottom: 10rpx;
+  font-size: 52rpx;
+  margin-bottom: 12rpx;
 }
 .nav-text {
-  font-size: 24rpx;
-  color: #aaaaaa;
+  font-size: 26rpx;
+  color: #374151;
 }
 
 /* Marquee / Bullet Screen Styles */
 .marquee-section {
-  background: #15151e;
+  background: #ffffff;
   margin: 0 24rpx 30rpx;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 24rpx;
-  border: 1px solid #2a2a36;
+  border: 1px solid #e5e7eb;
 }
 .marquee-header {
   display: flex;
@@ -206,15 +265,14 @@ page {
   align-items: center;
   font-size: 28rpx;
   font-weight: bold;
-  color: #ffffff;
+  color: #111827;
 }
 .dot {
-  width: 12rpx;
-  height: 12rpx;
-  background: #e5007f;
+  width: 14rpx;
+  height: 14rpx;
+  background: #10b981;
   border-radius: 50%;
-  margin-right: 12rpx;
-  box-shadow: 0 0 10rpx #e5007f;
+  margin-right: 14rpx;
 }
 .marquee-actions {
   display: flex;
@@ -222,22 +280,24 @@ page {
 }
 .action-btn {
   font-size: 24rpx;
-  color: #888888;
+  color: #6b7280;
   margin-left: 20rpx;
 }
 .report-btn {
-  background: #2a2a36;
-  color: #e5007f;
-  padding: 4rpx 16rpx;
-  border-radius: 20rpx;
+  background: #f3f4f6;
+  color: #374151;
+  padding: 6rpx 20rpx;
+  border-radius: 30rpx;
+  border: 1px solid #d1d5db;
 }
 .marquee-swiper {
-  height: 120rpx;
-  background: #1e1e28;
-  border-radius: 12rpx;
+  height: 130rpx;
+  background: #f9fafb;
+  border-radius: 16rpx;
+  border: 1px solid #e5e7eb;
 }
 .marquee-content {
-  padding: 20rpx;
+  padding: 24rpx;
   height: 100%;
   box-sizing: border-box;
   display: flex;
@@ -246,28 +306,29 @@ page {
 }
 .marquee-main {
   font-size: 28rpx;
-  color: #dddddd;
-  font-weight: bold;
+  color: #374151;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .marquee-date {
-  color: #e5007f;
-  margin-right: 10rpx;
+  color: #2563eb;
+  margin-right: 14rpx;
+  font-weight: bold;
 }
 .marquee-user {
   display: flex;
   align-items: center;
-  font-size: 22rpx;
-  color: #888888;
+  font-size: 24rpx;
+  color: #6b7280;
 }
 .user-avatar {
   width: 32rpx;
   height: 32rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #e5007f, #9900ff);
-  margin-right: 10rpx;
+  background: #e5e7eb;
+  margin-right: 12rpx;
 }
 .marquee-time {
   margin-left: auto;
@@ -276,33 +337,34 @@ page {
 .filter-section {
   display: flex;
   padding: 0 24rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
   overflow-x: auto;
   white-space: nowrap;
 }
 .filter-btn {
-  padding: 10rpx 30rpx;
-  border-radius: 30rpx;
-  background: #1a1a24;
-  color: #888;
+  padding: 12rpx 32rpx;
+  border-radius: 32rpx;
+  background: #f3f4f6;
+  color: #4b5563;
   font-size: 26rpx;
   margin-right: 20rpx;
   flex-shrink: 0;
+  border: 1px solid #e5e7eb;
 }
 .filter-btn.active {
-  background: #e5007f;
-  color: #fff;
-  box-shadow: 0 0 10rpx rgba(229, 0, 127, 0.5);
+  background: #111827;
+  color: #ffffff;
+  border: 1px solid #111827;
 }
 .venue-list {
   padding: 0 24rpx;
 }
 .venue-card {
-  background: #15151e;
+  background: #ffffff;
   border-radius: 20rpx;
-  padding: 30rpx;
-  margin-bottom: 30rpx;
-  border: 1px solid #2a2a36;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  border: 1px solid #e5e7eb;
   position: relative;
 }
 .card-header {
@@ -314,41 +376,31 @@ page {
 .venue-name {
   font-size: 36rpx;
   font-weight: bold;
-  color: #ffffff;
+  color: #111827;
 }
 .status-tag {
-  padding: 4rpx 16rpx;
-  border-radius: 8rpx;
+  padding: 6rpx 20rpx;
+  border-radius: 30rpx;
   font-size: 22rpx;
   font-weight: bold;
 }
 .status-open {
-  background: rgba(0, 255, 128, 0.1);
-  color: #00ff80;
-  border: 1px solid #00ff80;
-  box-shadow: 0 0 8rpx rgba(0, 255, 128, 0.3);
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 .status-closed {
-  background: rgba(255, 64, 64, 0.1);
-  color: #ff4040;
-  border: 1px solid #ff4040;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 .card-body {
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
 .venue-hours {
   font-size: 26rpx;
-  color: #bbbbbb;
+  color: #4b5563;
   display: block;
-}
-.venue-notice {
-  display: inline-block;
-  margin-top: 10rpx;
-  font-size: 24rpx;
-  color: #e5007f;
-  background: rgba(229, 0, 127, 0.1);
-  padding: 4rpx 12rpx;
-  border-radius: 4rpx;
 }
 .card-footer {
   display: flex;
@@ -357,7 +409,7 @@ page {
 }
 .venue-address {
   font-size: 24rpx;
-  color: #777777;
+  color: #6b7280;
   max-width: 70%;
   white-space: nowrap;
   overflow: hidden;
@@ -366,19 +418,25 @@ page {
 .distance-box {
   display: flex;
   align-items: center;
-  background: #e5007f;
-  padding: 8rpx 20rpx;
-  border-radius: 12rpx;
-  box-shadow: 0 0 10rpx rgba(229, 0, 127, 0.4);
+  background: #f3f4f6;
+  padding: 10rpx 24rpx;
+  border-radius: 30rpx;
+  border: 1px solid #d1d5db;
 }
 .distance-text {
-  font-size: 26rpx;
+  font-size: 24rpx;
   font-weight: bold;
-  color: #ffffff;
-  margin-right: 10rpx;
+  color: #1f2937;
+  margin-right: 8rpx;
 }
 .nav-arrow {
+  font-size: 22rpx;
+  color: #4b5563;
+}
+.loading-state {
+  text-align: center;
+  padding: 30rpx 0;
+  color: #6b7280;
   font-size: 24rpx;
-  color: #ffffff;
 }
 </style>

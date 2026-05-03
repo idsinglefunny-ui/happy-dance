@@ -71,8 +71,8 @@
         <text class="detail-title">费用明细：</text>
         <view class="song-item" v-for="(song, index) in songRecords" :key="index">
           <view class="song-header">
-            <text class="song-name">第{{ index + 1 }}首</text>
-            <text class="song-price">{{ song.cost }}元</text>
+            <text class="song-name">第 {{ index + 1 }} 首</text>
+            <text class="song-price">{{ song.cost }} 元</text>
           </view>
           <view class="song-time">
             {{ formatTime(song.start) }} ~ {{ song.end ? formatTime(song.end) : '--:--:--' }} 
@@ -173,7 +173,6 @@ const startTimer = () => {
 };
 
 const addManualSong = () => {
-  // 手动点击重新开始，结算当前歌曲，新开一首
   const now = Date.now();
   const currentSong = songRecords.value[songRecords.value.length - 1];
   if (currentSong) {
@@ -219,18 +218,19 @@ onUnmounted(() => {
 
 <style>
 page {
-  background-color: #0b0b0e;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #111827;
 }
 .container {
   padding: 24rpx;
   padding-bottom: 60rpx;
 }
 .config-card {
-  background: #15151e;
-  border-radius: 16rpx;
-  padding: 30rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 32rpx;
   margin-bottom: 24rpx;
+  border: 1px solid #e5e7eb;
 }
 .config-row {
   display: flex;
@@ -238,17 +238,18 @@ page {
 }
 .label {
   font-size: 28rpx;
-  color: #dddddd;
+  color: #374151;
 }
 .picker-box {
-  background: #1e1e28;
-  padding: 10rpx 30rpx;
-  border-radius: 8rpx;
+  background: #f3f4f6;
+  padding: 12rpx 32rpx;
+  border-radius: 12rpx;
   margin-left: 20rpx;
+  border: 1px solid #d1d5db;
 }
 .picker-text {
   font-size: 28rpx;
-  color: #ffffff;
+  color: #111827;
 }
 .input-group {
   display: flex;
@@ -256,17 +257,18 @@ page {
 }
 .input-label {
   font-size: 26rpx;
-  color: #aaaaaa;
+  color: #4b5563;
   margin-bottom: 16rpx;
 }
 .input {
-  background: #1e1e28;
-  height: 80rpx;
-  border-radius: 8rpx;
-  padding: 0 20rpx;
-  color: #ffffff;
+  background: #ffffff;
+  height: 88rpx;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  color: #111827;
   font-size: 32rpx;
-  border: 1px solid #2a2a36;
+  border: 1px solid #d1d5db;
+  box-sizing: border-box;
 }
 .action-row {
   display: flex;
@@ -275,10 +277,10 @@ page {
 }
 .btn {
   flex: 1;
-  margin: 0 10rpx;
+  margin: 0 8rpx;
   height: 90rpx;
-  border-radius: 12rpx;
-  font-size: 28rpx;
+  border-radius: 16rpx;
+  font-size: 26rpx;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -286,42 +288,44 @@ page {
   border: none;
   color: #ffffff;
 }
-.btn-start { background: linear-gradient(135deg, #b040ff, #e5007f); }
-.btn-end { background: linear-gradient(135deg, #00b4db, #0083b0); }
-.btn-reset { background: linear-gradient(135deg, #a800ff, #6a00ff); }
+.btn-start { background: #111827; }
+.btn-end { background: #374151; }
+.btn-reset { background: #6b7280; }
 
 .status-text {
   display: flex;
   justify-content: space-between;
   font-size: 24rpx;
-  color: #888888;
-  margin-bottom: 20rpx;
+  color: #4b5563;
+  margin-bottom: 24rpx;
   padding: 0 10rpx;
 }
 
 .result-card {
-  background: #15151e;
-  border-radius: 16rpx;
-  padding: 30rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  border: 1px solid #e5e7eb;
 }
 .summary-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 40rpx;
+  margin-bottom: 32rpx;
 }
 .summary-box {
   flex: 1;
-  background: #1e1e28;
-  margin: 0 10rpx;
-  padding: 30rpx 0;
-  border-radius: 12rpx;
+  background: #f9fafb;
+  margin: 0 8rpx;
+  padding: 32rpx 0;
+  border-radius: 16rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
+  border: 1px solid #e5e7eb;
 }
 .summary-title {
   font-size: 26rpx;
-  color: #888888;
+  color: #4b5563;
   margin-bottom: 10rpx;
 }
 .summary-value {
@@ -329,7 +333,7 @@ page {
   font-weight: bold;
 }
 .highlight {
-  color: #b040ff;
+  color: #111827;
 }
 
 .detail-row {
@@ -338,31 +342,34 @@ page {
   margin-bottom: 16rpx;
   font-size: 26rpx;
 }
-.detail-label { color: #888888; }
-.detail-val { color: #dddddd; }
+.detail-label { color: #4b5563; }
+.detail-val { color: #111827; }
 
 .divider {
   height: 1px;
-  background: #2a2a36;
+  background: #e5e7eb;
   margin: 30rpx 0;
 }
 .detail-title {
   font-size: 28rpx;
   font-weight: bold;
-  color: #ffffff;
+  color: #111827;
   display: block;
   margin-bottom: 20rpx;
 }
 .song-item {
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
+}
+.song-item:last-child {
+  margin-bottom: 0;
 }
 .song-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10rpx;
 }
-.song-name { font-size: 26rpx; font-weight: bold; }
-.song-price { font-size: 26rpx; color: #b040ff; font-weight: bold; }
-.song-time { font-size: 24rpx; color: #888888; }
-.song-duration { color: #555555; margin-left: 10rpx; }
+.song-name { font-size: 26rpx; font-weight: bold; color: #111827; }
+.song-price { font-size: 26rpx; color: #111827; font-weight: bold; }
+.song-time { font-size: 24rpx; color: #4b5563; }
+.song-duration { color: #6b7280; margin-left: 10rpx; }
 </style>

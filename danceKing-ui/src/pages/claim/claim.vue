@@ -42,9 +42,9 @@
         <view class="input-item">
           <text class="label"><text class="required">*</text> 与舞厅的关系</text>
           <radio-group name="relationship" class="radio-group">
-            <label class="radio-label"><radio value="老板" color="#e5007f" /> 老板</label>
-            <label class="radio-label"><radio value="经理" color="#e5007f" /> 经理</label>
-            <label class="radio-label"><radio value="工作人员" color="#e5007f" /> 员工</label>
+            <label class="radio-label"><radio value="老板" color="#111827" /> 老板</label>
+            <label class="radio-label"><radio value="经理" color="#111827" /> 经理</label>
+            <label class="radio-label"><radio value="工作人员" color="#111827" /> 员工</label>
           </radio-group>
         </view>
       </view>
@@ -59,7 +59,7 @@
 
       <view class="submit-section">
         <label class="agreement">
-          <checkbox color="#e5007f" style="transform:scale(0.8)" /> 同意《商家签署协议》
+          <checkbox color="#111827" style="transform:scale(0.8)" /> 同意《商家签署协议》
         </label>
         <button class="submit-btn" form-type="submit">提交认领申请</button>
       </view>
@@ -71,7 +71,6 @@
 const chooseLocation = () => {
   uni.chooseLocation({
     success: (res) => {
-      // 可以在这里回填地址
       uni.showToast({ title: '已获取位置', icon: 'none' })
     }
   })
@@ -109,67 +108,74 @@ const submitForm = (e) => {
 
 <style>
 page {
-  background-color: #0b0b0e;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #1f2937;
 }
 .container {
   padding: 24rpx;
   padding-bottom: 100rpx;
 }
 .header-notice {
-  background: rgba(229, 0, 127, 0.1);
-  border: 1px solid rgba(229, 0, 127, 0.3);
-  padding: 20rpx;
-  border-radius: 12rpx;
-  margin-bottom: 30rpx;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  margin-bottom: 32rpx;
 }
 .title {
-  color: #e5007f;
+  color: #1f2937;
   font-weight: bold;
   font-size: 28rpx;
   display: block;
   margin-bottom: 10rpx;
 }
 .desc {
-  color: #bbbbbb;
+  color: #4b5563;
   font-size: 24rpx;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 .form-group {
-  background: #15151e;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 30rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+  border: 1px solid #e5e7eb;
 }
 .group-title {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: bold;
-  margin-bottom: 30rpx;
+  margin-bottom: 32rpx;
   display: block;
-  color: #fff;
+  color: #111827;
 }
 .input-item {
-  margin-bottom: 30rpx;
+  margin-bottom: 32rpx;
+}
+.input-item:last-child {
+  margin-bottom: 0;
 }
 .label {
-  font-size: 28rpx;
-  color: #dddddd;
+  font-size: 26rpx;
+  color: #374151;
   margin-bottom: 16rpx;
   display: block;
 }
 .required {
-  color: #ff4040;
+  color: #ef4444;
+  margin-right: 4rpx;
 }
 .input {
-  background: #1e1e28;
-  height: 80rpx;
-  border-radius: 8rpx;
-  padding: 0 20rpx;
-  color: #ffffff;
+  background: #ffffff;
+  height: 88rpx;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  color: #111827;
   font-size: 28rpx;
+  border: 1px solid #d1d5db;
+  box-sizing: border-box;
 }
 .ph {
-  color: #555555;
+  color: #9ca3af;
 }
 .address-box {
   display: flex;
@@ -179,14 +185,17 @@ page {
   flex: 1;
 }
 .location-icon {
-  width: 80rpx;
-  height: 80rpx;
-  background: #2a2a36;
-  margin-left: 10rpx;
-  border-radius: 8rpx;
+  width: 88rpx;
+  height: 88rpx;
+  background: #f3f4f6;
+  margin-left: 16rpx;
+  border-radius: 12rpx;
+  border: 1px solid #d1d5db;
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size: 32rpx;
+  box-sizing: border-box;
 }
 .radio-group {
   display: flex;
@@ -196,45 +205,52 @@ page {
   font-size: 28rpx;
   display: flex;
   align-items: center;
-  color: #ccc;
+  color: #4b5563;
 }
 .upload-box {
-  width: 160rpx;
-  height: 160rpx;
-  border: 1px dashed #e5007f;
-  border-radius: 8rpx;
+  width: 170rpx;
+  height: 170rpx;
+  border: 1px dashed #d1d5db;
+  border-radius: 12rpx;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: rgba(229, 0, 127, 0.05);
+  background: #f9fafb;
 }
 .upload-icon {
-  font-size: 60rpx;
-  color: #e5007f;
-  margin-bottom: 10rpx;
+  font-size: 64rpx;
+  color: #9ca3af;
+  margin-bottom: 8rpx;
   line-height: 1;
 }
 .upload-text {
   font-size: 22rpx;
-  color: #e5007f;
+  color: #6b7280;
 }
 .submit-section {
-  margin-top: 40rpx;
+  margin-top: 48rpx;
 }
 .agreement {
   font-size: 24rpx;
-  color: #888888;
+  color: #4b5563;
   display: flex;
   align-items: center;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
 .submit-btn {
-  background: linear-gradient(90deg, #e5007f, #9900ff);
+  background: #111827;
   color: #ffffff;
-  border-radius: 40rpx;
+  border-radius: 44rpx;
   font-size: 32rpx;
   font-weight: bold;
   border: none;
+  height: 88rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.submit-btn::after {
+  display: none;
 }
 </style>

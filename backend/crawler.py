@@ -92,7 +92,6 @@ def sync_data(is_manual=False):
             for index, hall_overview in enumerate(all_halls):
                 hall_id = hall_overview.get('id')
                 status = hall_overview.get('derived_status', 0)
-                hot = hall_overview.get('hot', 0)
                 
                 # 获取详细信息
                 detail = fetch_detail(hall_id)
@@ -106,25 +105,27 @@ def sync_data(is_manual=False):
                 address = detail.get('address', '')
                 longitude = detail.get('longitude', 0)
                 latitude = detail.get('latitude', 0)
+                hot = detail.get('hot', 0)
                 
                 morning_hours = detail.get('morningOpenCloseTime', '')
                 afternoon_hours = detail.get('noonOpenCloseTime', '')
                 evening_hours = detail.get('eveningOpenCloseTime', '')
                 ticket_price = detail.get('ticket', '')
                 moment_text = detail.get('moment', '')
+                cover = detail.get('cover', '')
                 
                 # 插入或更新 SQL
                 sql = """
                 INSERT INTO `dance_halls` (
                     `id`, `name`, `province`, `city`, `address`, 
                     `longitude`, `latitude`, `location`,
-                    `open_status`, `hot`, 
+                    `open_status`, `hot`, `cover`,
                     `morning_hours`, `afternoon_hours`, `evening_hours`,
                     `ticket_price`, `moment_text`
                 ) VALUES (
                     %s, %s, %s, %s, %s,
                     %s, %s, ST_GeomFromText(%s, 4326),
-                    %s, %s,
+                    %s, %s, %s,
                     %s, %s, %s,
                     %s, %s
                 )
@@ -133,7 +134,7 @@ def sync_data(is_manual=False):
                     `address`=VALUES(`address`),
                     `longitude`=VALUES(`longitude`), `latitude`=VALUES(`latitude`),
                     `location`=VALUES(`location`),
-                    `open_status`=VALUES(`open_status`), `hot`=VALUES(`hot`),
+                    `open_status`=VALUES(`open_status`), `hot`=VALUES(`hot`), `cover`=VALUES(`cover`),
                     `morning_hours`=VALUES(`morning_hours`), `afternoon_hours`=VALUES(`afternoon_hours`), `evening_hours`=VALUES(`evening_hours`),
                     `ticket_price`=VALUES(`ticket_price`), `moment_text`=VALUES(`moment_text`)
                 """
@@ -145,7 +146,7 @@ def sync_data(is_manual=False):
                     cursor.execute(sql, (
                         hall_id, name, province, city, address,
                         longitude, latitude, point_str,
-                        status, hot,
+                        status, hot, cover,
                         morning_hours, afternoon_hours, evening_hours,
                         ticket_price, moment_text
                     ))
@@ -163,9 +164,13 @@ def sync_data(is_manual=False):
 
             connection.commit()
             print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] 成功更新 {success_count} 条记录到数据库。")
+            return {"synced_count": success_count}
             
     finally:
         connection.close()
 
+trigger_sync = sync_data
+
 if __name__ == "__main__":
     sync_data(is_manual=True)
+
