@@ -212,10 +212,29 @@ if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=12800, reload=True)
 
 @app.get("/api/reports")
-def get_reports(db: pymysql.connections.Connection = Depends(get_db)):
+def get_reports(latitude: float = None, longitude: float = None, db: pymysql.connections.Connection = Depends(get_db)):
     try:
         with db.cursor() as cursor:
-            cursor.execute("SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%m-%d') as date FROM dance_halls ORDER BY updated_at DESC LIMIT 10")
+            city = None
+            if latitude is not None and longitude is not None:
+                cursor.execute(
+                    "SELECT city FROM dance_halls ORDER BY ST_Distance_Sphere(location, ST_GeomFromText(%s, 4326)) LIMIT 1",
+                    (f"POINT({longitude} {latitude})",)
+                )
+                closest = cursor.fetchone()
+                if closest:
+                    city = closest['city']
+
+            if city:
+                cursor.execute(
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%m-%d') as date FROM dance_halls WHERE city = %s AND DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 2",
+                    (city,)
+                )
+            else:
+                cursor.execute(
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%m-%d') as date FROM dance_halls WHERE DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 2"
+                )
+            
             halls = cursor.fetchall()
             results = []
             for h in halls:
@@ -229,10 +248,10 @@ def get_reports(db: pymysql.connections.Connection = Depends(get_db)):
                     "date": h['date'] or "最新",
                     "text": text
                 })
+            
             if not results:
                 results = [
-                    {"date": "今天", "text": "莎莎舞厅最新动态实时滚动更新中"},
-                    {"date": "今天", "text": "最新莎莎舞资讯实时为你播报"}
+                    {"date": "今天", "text": "本市今日暂无更多最新动态"}
                 ]
             return {"code": 200, "data": results}
     except Exception as e:

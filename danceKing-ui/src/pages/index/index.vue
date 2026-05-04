@@ -128,6 +128,10 @@ const fetchVenues = (page = 1) => {
 const fetchReports = () => {
   uni.request({
     url: 'http://localhost:12800/api/reports',
+    data: {
+      latitude: 30.6586,
+      longitude: 104.0648
+    },
     success: (res) => {
       if (res.data && res.data.code === 200 && res.data.data) {
         marqueeList.value = res.data.data;
