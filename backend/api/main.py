@@ -215,8 +215,25 @@ if __name__ == "__main__":
 def get_reports(db: pymysql.connections.Connection = Depends(get_db)):
     try:
         with db.cursor() as cursor:
-            cursor.execute("SELECT venue_name, report_text, reporter_name as user, DATE_FORMAT(created_at, '%H:%i') as time, DATE_FORMAT(created_at, '%m-%d') as date FROM dance_hall_reports ORDER BY id DESC LIMIT 20")
-            results = cursor.fetchall()
+            cursor.execute("SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%m-%d') as date FROM dance_halls ORDER BY updated_at DESC LIMIT 10")
+            halls = cursor.fetchall()
+            results = []
+            for h in halls:
+                text = ""
+                if h.get('moment_text'):
+                    text = f"{h['name']} 最新公告：{h['moment_text']}"
+                else:
+                    status_str = "正常营业" if h['open_status'] == 1 else "休息中"
+                    text = f"{h['name']} 今日状态：{status_str}"
+                results.append({
+                    "date": h['date'] or "最新",
+                    "text": text
+                })
+            if not results:
+                results = [
+                    {"date": "今天", "text": "莎莎舞厅最新动态实时滚动更新中"},
+                    {"date": "今天", "text": "最新莎莎舞资讯实时为你播报"}
+                ]
             return {"code": 200, "data": results}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
