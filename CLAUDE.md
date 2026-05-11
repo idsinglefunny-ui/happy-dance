@@ -13,6 +13,7 @@ backend/          — Python FastAPI backend (uvicorn, port 12800)
   schema.sql        — MySQL schema
 admin/            — Vue 3 + Vant 管理后台 (Vite build)
 danceKing-ui/     — 微信小程序前端 (uni-app)
+  src/config.js      — API 地址配置 (根据环境自动切换)
 ```
 
 ## Build & Run Commands
@@ -30,6 +31,27 @@ npm install && npx vite build                    # build to admin/dist/
 # Run crawler manually
 cd backend && python crawler.py
 ```
+
+# Run crawler manually
+cd backend && python crawler.py
+
+# Mini Program (微信小程序)
+cd danceKing-ui
+npm install
+npx uni -p mp-weixin                    # 开发模式 → dist/dev/mp-weixin/
+npx uni build -p mp-weixin              # 生产构建 → dist/build/mp-weixin/
+```
+
+## Mini Program Environment Config
+
+`src/config.js` 根据 Vite 环境变量自动切换后端地址：
+
+| Command | `import.meta.env.DEV` | API Base URL |
+|---------|-----------------------|--------------|
+| `uni -p mp-weixin` | `true` | `http://localhost:12800` |
+| `uni build -p mp-weixin` | `false` | `https://dance.tangpinglife.com` |
+
+所有页面通过 `import BASE_URL from '@/config.js'` 引用，不直接硬编码地址。
 
 ## Tech Stack
 
