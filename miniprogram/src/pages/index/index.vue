@@ -82,6 +82,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { onReachBottom } from '@dcloudio/uni-app';
+import BASE_URL from '@/config.js'
 
 const venues = ref([]);
 const currentFilter = ref('all');
@@ -112,7 +113,7 @@ const fetchVenues = (page = 1) => {
   }
 
   uni.request({
-    url: 'http://localhost:12800/api/dance-halls',
+    url: `${BASE_URL}/api/dance-halls`,
     data: params,
     success: (res) => {
       if (res.data && res.data.code === 200) {
@@ -137,7 +138,7 @@ const fetchVenues = (page = 1) => {
 
 const fetchReports = () => {
   uni.request({
-    url: 'http://localhost:12800/api/reports',
+    url: `${BASE_URL}/api/reports`,
     data: {
       latitude: userCoords.value.latitude,
       longitude: userCoords.value.longitude

@@ -85,10 +85,12 @@ const chooseImage = () => {
   })
 };
 
+import BASE_URL from '@/config.js'
+
 const submitForm = (e) => {
   const data = e.detail.value;
   uni.request({
-    url: 'http://localhost:12800/api/claims',
+    url: `${BASE_URL}/api/claims`,
     method: 'POST',
     data: data,
     success: (res) => {
