@@ -19,6 +19,6 @@ Thumbs.db
 
 # Project specific
 backend/__pycache__/
-danceKing-ui/node_modules/
+miniprogram/node_modules/
 admin/node_modules/
 unpackage/
