@@ -1,15 +1,6 @@
 import pymysql
 import os
-
-DB_CONFIG = {
-    'host': '117.72.76.53',
-    'port': 63306,
-    'user': 'king_dancer_go',
-    'password': 'KingDance_._334456',
-    'database': 'king_dance',
-    'charset': 'utf8mb4',
-    'cursorclass': pymysql.cursors.DictCursor
-}
+from crawler import DB_CONFIG
 
 def init_db():
     connection = pymysql.connect(**DB_CONFIG)

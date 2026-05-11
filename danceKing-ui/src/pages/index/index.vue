@@ -3,8 +3,12 @@
     <!-- Top Banner -->
     <view class="banner">
       <view class="banner-gradient">
-        <text class="banner-title">全国最火爆的莎莎舞厅</text>
-        <text class="banner-subtitle">探索全国舞讯 · 计时体验升级</text>
+        <text class="banner-title">{{ currentCity ? currentCity + '莎莎舞厅' : '全国莎莎舞厅' }}</text>
+        <view class="location-badge" v-if="currentCity">
+          <text class="location-icon">📍</text>
+          <text>{{ currentCity }}</text>
+        </view>
+        <text class="banner-subtitle" v-else>探索全国舞讯 · 计时体验升级</text>
       </view>
     </view>
 
@@ -83,6 +87,8 @@ const venues = ref([]);
 const currentFilter = ref('all');
 const currentPage = ref(1);
 const hasMore = ref(true);
+const currentCity = ref('');
+const userCoords = ref({ latitude: 30.6586, longitude: 104.0648 }); // 默认成都
 
 const marqueeList = ref([
   { date: '05-01', text: '金卡罗 临时停业，大家别跑空了', user: '悉达多', time: '1分钟前' },
@@ -94,8 +100,8 @@ const fetchVenues = (page = 1) => {
   const params = {
     page: page,
     page_size: 10,
-    latitude: 30.6586,
-    longitude: 104.0648
+    latitude: userCoords.value.latitude,
+    longitude: userCoords.value.longitude
   };
   if (currentFilter.value === 'open') {
     params.open_status = 1;
@@ -111,6 +117,9 @@ const fetchVenues = (page = 1) => {
     success: (res) => {
       if (res.data && res.data.code === 200) {
         const newData = res.data.data || [];
+        if (res.data.current_city) {
+          currentCity.value = res.data.current_city;
+        }
         if (page === 1) {
           venues.value = newData;
         } else {
@@ -125,12 +134,13 @@ const fetchVenues = (page = 1) => {
     }
   });
 };
+
 const fetchReports = () => {
   uni.request({
     url: 'http://localhost:12800/api/reports',
     data: {
-      latitude: 30.6586,
-      longitude: 104.0648
+      latitude: userCoords.value.latitude,
+      longitude: userCoords.value.longitude
     },
     success: (res) => {
       if (res.data && res.data.code === 200 && res.data.data) {
@@ -140,7 +150,32 @@ const fetchReports = () => {
   });
 };
 
-onMounted(() => {
+const getLocation = () => {
+  return new Promise((resolve) => {
+    // #ifdef MP-WEIXIN || APP-PLUS
+    uni.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        userCoords.value = {
+          latitude: res.latitude,
+          longitude: res.longitude
+        };
+        resolve();
+      },
+      fail: (err) => {
+        console.warn('获取定位失败:', err);
+        resolve();
+      }
+    });
+    // #endif
+    // #ifndef MP-WEIXIN || APP-PLUS
+    resolve();
+    // #endif
+  });
+};
+
+onMounted(async () => {
+  await getLocation();
   fetchReports();
   fetchVenues(1);
 });
@@ -220,6 +255,24 @@ page {
 .banner-subtitle {
   font-size: 24rpx;
   color: #6b7280;
+}
+.location-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(17, 24, 39, 0.05);
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+  margin-top: 8rpx;
+  width: fit-content;
+}
+.location-icon {
+  font-size: 24rpx;
+  margin-right: 6rpx;
+}
+.location-badge text {
+  font-size: 24rpx;
+  color: #4b5563;
+  font-weight: 500;
 }
 .nav-grid {
   display: flex;

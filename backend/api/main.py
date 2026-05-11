@@ -71,21 +71,36 @@ def get_nearby_dance_halls(
     """获取附近的舞厅，按距离排序"""
     try:
         with db.cursor() as cursor:
-            # Build query with optional filters
-            where_clauses = []
-            params = []
-            
-            # Distance
+            # 1. 自动识别用户所在城市 (基于数据库中最近的一个点)
             point_str = f"POINT({latitude} {longitude})"
-            where_clauses.append("1=1")
+            cursor.execute("""
+                SELECT city, ST_Distance_Sphere(location, ST_GeomFromText(%s, 4326)) as dist
+                FROM dance_halls 
+                ORDER BY dist ASC 
+                LIMIT 1
+            """, (point_str,))
+            closest = cursor.fetchone()
+            
+            # 如果最近的点在 100km 以内，我们认为用户属于该城市
+            # 如果超过 100km，则认为当前位置不在数据库覆盖范围内，不进行强制城市过滤
+            user_city = closest['city'] if closest and closest['dist'] < 100000 else None
+
+            # 2. 构建查询条件
+            where_clauses = ["1=1"]
+            # 注意：第一个参数是用于 SELECT 中计算距离的 point_str
+            query_params = [] 
+
+            if user_city:
+                where_clauses.append("city = %s")
+                query_params.append(user_city)
             
             if open_status is not None:
                 where_clauses.append("open_status = %s")
-                params.append(open_status)
+                query_params.append(open_status)
                 
             if hot is not None:
                 where_clauses.append("hot = %s")
-                params.append(hot)
+                query_params.append(hot)
 
             where_str = " AND ".join(where_clauses)
             
@@ -100,7 +115,8 @@ def get_nearby_dance_halls(
                 LIMIT %s OFFSET %s
             """
             offset = (page - 1) * page_size
-            params_for_execute = [point_str] + params + [page_size, offset]
+            # 最终参数列表：[SELECT中的point_str, WHERE中的参数..., LIMIT, OFFSET]
+            params_for_execute = [point_str] + query_params + [page_size, offset]
             cursor.execute(sql, params_for_execute)
             results = cursor.fetchall()
             
@@ -113,7 +129,13 @@ def get_nearby_dance_halls(
                         r['distance_display'] = f"{dist/1000:.1f}km"
                 else:
                     r['distance_display'] = "未知"
-            return {"code": 200, "data": results}
+            
+            return {
+                "code": 200, 
+                "data": results,
+                "current_city": user_city,
+                "msg": f"已自动限定在 {user_city} 范围内" if user_city else "全网搜索"
+            }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

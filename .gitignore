@@ -1,0 +1,24 @@
+# Dependency directories
+node_modules/
+.venv/
+__pycache__/
+dist/
+unpackage/
+.temp/
+
+# Environment variables (SENSITIVE)
+.env
+*.env
+
+# Local IDE/System files
+.vscode/
+.idea/
+.DS_Store
+*.log
+Thumbs.db
+
+# Project specific
+backend/__pycache__/
+danceKing-ui/node_modules/
+danceKing-admin/node_modules/
+unpackage/

@@ -3,13 +3,19 @@ import json
 import time
 import pymysql
 
+import os
+from dotenv import load_dotenv
+
+# 加载 .env 文件
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+
 # 数据库配置
 DB_CONFIG = {
-    'host': '117.72.76.53',
-    'port': 63306,
-    'user': 'king_dancer_go',
-    'password': 'KingDance_._334456',
-    'database': 'king_dance',
+    'host': os.getenv('DB_HOST'),
+    'port': int(os.getenv('DB_PORT')), 
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'database': os.getenv('DB_NAME'),
     'charset': 'utf8mb4',
     'cursorclass': pymysql.cursors.DictCursor
 }
