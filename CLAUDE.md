@@ -30,10 +30,6 @@ npm install && npx vite build                    # build to admin/dist/
 
 # Run crawler manually
 cd backend && python crawler.py
-```
-
-# Run crawler manually
-cd backend && python crawler.py
 
 # Mini Program (微信小程序)
 cd danceKing-ui
@@ -49,7 +45,7 @@ npx uni build -p mp-weixin              # 生产构建 → dist/build/mp-weixin/
 | Command | `import.meta.env.DEV` | API Base URL |
 |---------|-----------------------|--------------|
 | `uni -p mp-weixin` | `true` | `http://localhost:12800` |
-| `uni build -p mp-weixin` | `false` | `https://dance.tangpinglife.com` |
+| `uni build -p mp-weixin` | `false` | `https://dance.index-tts.cn` |
 
 所有页面通过 `import BASE_URL from '@/config.js'` 引用，不直接硬编码地址。
 
@@ -62,14 +58,14 @@ npx uni build -p mp-weixin              # 生产构建 → dist/build/mp-weixin/
 
 ## Deploy
 
-**Production server:** `root@www.tangpinglife.com` (ssh-key login)
+**Production server:** `root@8.138.80.202` / `root@dance.index-tts.cn` (ssh-key login)
 
 ### Services
 
 | Service | Domain | Port | Description |
 |---------|--------|------|-------------|
-| Backend API | `https://dance.tangpinglife.com` | 12800 (behind nginx) | FastAPI |
-| Admin | `https://dance-admin.tangpinglife.com` | nginx static + API proxy | Vue SPA |
+| Backend API | `https://dance.index-tts.cn` | 12800 (behind nginx) | FastAPI |
+| Admin | `https://dance-admin.index-tts.cn` | nginx static + API proxy | Vue SPA |
 
 ### Deploy Paths on Server
 
@@ -79,8 +75,8 @@ npx uni build -p mp-weixin              # 生产构建 → dist/build/mp-weixin/
 | Backend .env | `/root/happy-dance/backend/.env` |
 | Admin dist | `/root/happy-dance/admin/dist/` |
 | Systemd service | `/etc/systemd/system/happy-dance.service` |
-| Nginx config | `/etc/nginx/conf.d/dance.tangpinglife.com.conf` |
-| SSL certs | `/etc/nginx/ssl/dance.tangpinglife.com/` and `/etc/nginx/ssl/dance-admin.tangpinglife.com/` |
+| Nginx config | `/etc/nginx/conf.d/dance.conf` |
+| SSL certs | `/etc/nginx/ssl/dance.index-tts.cn/` and `/etc/nginx/ssl/dance-admin.index-tts.cn/` |
 | htpasswd | `/etc/nginx/.htpasswd-dance-admin` |
 
 ### Admin Authentication
@@ -98,14 +94,14 @@ External MySQL at `117.72.76.53:63306`, database `king_dance`.
 
 ```bash
 # Deploy backend (upload code + restart)
-scp /path/to/happy-dance/backend/api/main.py root@www.tangpinglife.com:/root/happy-dance/backend/api/
-scp /path/to/happy-dance/backend/crawler.py root@www.tangpinglife.com:/root/happy-dance/backend/
-ssh root@www.tangpinglife.com "systemctl restart happy-dance"
+scp /path/to/happy-dance/backend/api/main.py root@dance.index-tts.cn:/root/happy-dance/backend/api/
+scp /path/to/happy-dance/backend/crawler.py root@dance.index-tts.cn:/root/happy-dance/backend/
+ssh root@dance.index-tts.cn "systemctl restart happy-dance"
 
 # Deploy admin (build locally + upload + fix permissions)
 cd admin && npm install && npx vite build
-scp -r dist/* root@www.tangpinglife.com:/root/happy-dance/admin/dist/
-ssh root@www.tangpinglife.com "chmod -R 755 /root/happy-dance/admin/dist"
+scp -r dist/* root@dance.index-tts.cn:/root/happy-dance/admin/dist/
+ssh root@dance.index-tts.cn "chmod -R 755 /root/happy-dance/admin/dist"
 ```
 
 ### Systemd Service Management
@@ -121,4 +117,4 @@ systemctl restart happy-dance      # restart
 - Server has only 1.8GB RAM — Python runs fine, no need to build locally
 - uv is installed at `/root/.local/bin/uv` with Aliyun PyPI mirror configured in `backend/uv.toml`
 - SSL certs auto-renew via acme.sh
-- Both `dance.tangpinglife.com` and `dance-admin.tangpinglife.com` proxy `/api/` to backend port 12800
+- Both `dance.index-tts.cn` and `dance-admin.index-tts.cn` proxy `/api/` to backend port 12800
