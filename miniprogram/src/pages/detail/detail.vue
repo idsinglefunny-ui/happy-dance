@@ -72,15 +72,15 @@
 <script setup>
 import { ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
-import BASE_URL from '@/config.js'
+import { request } from '@/request.js'
 
 const venue = ref({});
 
 onLoad((options) => {
   const id = options.id;
   if (id) {
-    uni.request({
-      url: `${BASE_URL}/api/dance-halls/${id}`,
+    request({
+      url: `/api/dance-halls/${id}`,
       data: {
         latitude: 30.6586,
         longitude: 104.0648

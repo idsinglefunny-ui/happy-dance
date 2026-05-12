@@ -1,13 +1,17 @@
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from starlette.middleware.base import BaseHTTPMiddleware
 import pymysql
 import sys
 import os
+import json
 
 # 将 backend 目录加入 path 以便引入 crawler 配置
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import crawler
+from api.security import verify_sign, aes_encrypt
 
 app = FastAPI(title="Dance King API")
 
@@ -19,6 +23,59 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class SecurityMiddleware(BaseHTTPMiddleware):
+    """Sign verification + response encryption for mini-program API routes."""
+
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+
+        # Skip non-API and admin routes
+        if not path.startswith("/api/") or path.startswith("/api/admin/"):
+            return await call_next(request)
+
+        # Collect params (query params for GET, body for POST)
+        params = dict(request.query_params)
+
+        if request.method == "POST":
+            body = await request.body()
+            if body:
+                try:
+                    body_json = json.loads(body)
+                    if isinstance(body_json, dict):
+                        # Decrypt body if encrypted
+                        if "_encrypted" in body_json:
+                            from api.security import aes_decrypt
+                            decrypted = aes_decrypt(body_json["_encrypted"])
+                            body_json = json.loads(decrypted)
+                        params.update({k: str(v) for k, v in body_json.items() if k != "_encrypted"})
+                        # Store decrypted body for route handlers
+                        request._body = json.dumps(body_json).encode()
+                except (json.JSONDecodeError, Exception):
+                    pass
+
+        if not verify_sign(params):
+            return JSONResponse(status_code=403, content={"code": 403, "msg": "签名验证失败"})
+
+        response = await call_next(request)
+
+        # Encrypt response body
+        if response.status_code == 200:
+            body = b""
+            async for chunk in response.body_iterator:
+                body += chunk
+            try:
+                resp_data = json.loads(body)
+                encrypted = aes_encrypt(json.dumps(resp_data, ensure_ascii=False))
+                return JSONResponse(content={"data": encrypted})
+            except Exception:
+                pass
+
+        return response
+
+
+app.add_middleware(SecurityMiddleware)
 
 def init_reports_table():
     try:
