@@ -298,7 +298,7 @@ def get_reports(latitude: float = None, longitude: float = None, db: pymysql.con
             if latitude is not None and longitude is not None:
                 cursor.execute(
                     "SELECT city FROM dance_halls ORDER BY ST_Distance_Sphere(location, ST_GeomFromText(%s, 4326)) LIMIT 1",
-                    (f"POINT({longitude} {latitude})",)
+                    (f"POINT({latitude} {longitude})",)
                 )
                 closest = cursor.fetchone()
                 if closest:
