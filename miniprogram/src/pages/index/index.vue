@@ -91,11 +91,7 @@ const hasMore = ref(true);
 const currentCity = ref('');
 const userCoords = ref({ latitude: 30.6586, longitude: 104.0648 }); // 默认成都
 
-const marqueeList = ref([
-  { date: '05-01', text: '金卡罗 临时停业，大家别跑空了', user: '悉达多', time: '1分钟前' },
-  { date: '05-01', text: '迪乐汇歌舞厅 晚场满场，气氛极佳！', user: '舞王', time: '5分钟前' },
-  { date: '05-01', text: '星海壹号 下午 暂停营业', user: '匿名用户', time: '10分钟前' }
-]);
+const marqueeList = ref([]);
 
 const fetchVenues = (page = 1) => {
   const params = {

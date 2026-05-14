@@ -87,21 +87,11 @@ def init_reports_table():
                     venue_name VARCHAR(100),
                     report_text VARCHAR(255),
                     reporter_name VARCHAR(50),
+                    city VARCHAR(50) DEFAULT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-            # Insert some initial demo reports if table is empty
-            cursor.execute("SELECT COUNT(*) as cnt FROM dance_hall_reports")
-            if cursor.fetchone()['cnt'] == 0:
-                cursor.executemany("""
-                    INSERT INTO dance_hall_reports (venue_name, report_text, reporter_name)
-                    VALUES (%s, %s, %s)
-                """, [
-                    ("星海壹号", "05-01 星海壹号 下午 暂停营业", "悉达多"),
-                    ("迪乐汇歌舞厅", "05-01 迪乐汇歌舞厅 晚场满场，气氛极佳！", "舞王"),
-                    ("金卡罗", "05-01 金卡罗 临时停业，大家别跑空了", "匿名用户")
-                ])
-            conn.commit()
+        conn.commit()
         conn.close()
     except Exception as e:
         print("Failed to initialize reports table:", e)
@@ -302,30 +292,40 @@ def get_reports(latitude: float = None, longitude: float = None, db: pymysql.con
                 if closest:
                     city = closest['city']
 
+            results = []
+
+            # 1. 舞厅当日动态 (from dance_halls)
             if city:
                 cursor.execute(
-                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE city = %s AND DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 2",
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE city = %s AND DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 3",
                     (city,)
                 )
             else:
                 cursor.execute(
-                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 2"
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 3"
                 )
-            
-            halls = cursor.fetchall()
-            results = []
-            for h in halls:
+            for h in cursor.fetchall():
                 text = ""
                 if h.get('moment_text'):
                     text = f"{h['name']} 最新公告：{h['moment_text']}"
                 else:
                     status_str = "正常营业" if h['open_status'] == 1 else "休息中"
                     text = f"{h['name']} 今日状态：{status_str}"
-                results.append({
-                    "date": h['date'] or "最新",
-                    "text": text
-                })
-            
+                results.append({"date": h['date'] or "最新", "text": text})
+
+            # 2. 用户上报 (from dance_hall_reports)
+            if city:
+                cursor.execute(
+                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports WHERE city = %s ORDER BY created_at DESC LIMIT 3",
+                    (city,)
+                )
+            else:
+                cursor.execute(
+                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports ORDER BY created_at DESC LIMIT 3"
+                )
+            for r in cursor.fetchall():
+                results.append({"date": r['date'] or "最新", "text": f"{r['venue_name']}：{r['report_text']}"})
+
             if not results:
                 results = [
                     {"date": "今天", "text": "本市今日暂无更多最新动态"}
@@ -343,9 +343,15 @@ class ReportCreate(BaseModel):
 def create_report(report: ReportCreate, db: pymysql.connections.Connection = Depends(get_db)):
     try:
         with db.cursor() as cursor:
+            # 自动根据 venue_name 查找城市
+            city = None
+            cursor.execute("SELECT city FROM dance_halls WHERE name = %s LIMIT 1", (report.venue_name,))
+            row = cursor.fetchone()
+            if row:
+                city = row['city']
             cursor.execute(
-                "INSERT INTO dance_hall_reports (venue_name, report_text, reporter_name) VALUES (%s, %s, %s)",
-                (report.venue_name, report.report_text, report.reporter_name)
+                "INSERT INTO dance_hall_reports (venue_name, report_text, reporter_name, city) VALUES (%s, %s, %s, %s)",
+                (report.venue_name, report.report_text, report.reporter_name, city)
             )
             db.commit()
             return {"code": 200, "message": "上报成功"}
