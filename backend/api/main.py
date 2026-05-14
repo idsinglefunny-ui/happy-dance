@@ -304,12 +304,12 @@ def get_reports(latitude: float = None, longitude: float = None, db: pymysql.con
 
             if city:
                 cursor.execute(
-                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%m-%d') as date FROM dance_halls WHERE city = %s AND DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 2",
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE city = %s AND DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 2",
                     (city,)
                 )
             else:
                 cursor.execute(
-                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%m-%d') as date FROM dance_halls WHERE DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 2"
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 2"
                 )
             
             halls = cursor.fetchall()
