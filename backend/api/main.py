@@ -353,34 +353,34 @@ def get_reports(latitude: float = None, longitude: float = None, db: pymysql.con
 
             results = []
 
-            # 1. 舞厅当日动态 (from dance_halls)
+            # 1. 舞厅动态 (from dance_halls) — 只展示今天和昨天的
             if city:
                 cursor.execute(
-                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE city = %s AND DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 3",
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE city = %s AND updated_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY updated_at DESC LIMIT 3",
                     (city,)
                 )
             else:
                 cursor.execute(
-                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE DATE(updated_at) = CURDATE() ORDER BY updated_at DESC LIMIT 3"
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE updated_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY updated_at DESC LIMIT 3"
                 )
             for h in cursor.fetchall():
                 text = ""
                 if h.get('moment_text'):
-                    text = f"{h['name']} 最新公告：{h['moment_text']}"
+                    text = f"{h['name']}：{h['moment_text']}"
                 else:
                     status_str = "正常营业" if h['open_status'] == 1 else "休息中"
-                    text = f"{h['name']} 今日状态：{status_str}"
+                    text = f"{h['name']}：{status_str}"
                 results.append({"date": h['date'] or "最新", "text": text})
 
-            # 2. 用户上报 (from dance_hall_reports)
+            # 2. 用户上报 (from dance_hall_reports) — 只展示今天和昨天的
             if city:
                 cursor.execute(
-                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports WHERE city = %s ORDER BY created_at DESC LIMIT 3",
+                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports WHERE city = %s AND created_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY created_at DESC LIMIT 3",
                     (city,)
                 )
             else:
                 cursor.execute(
-                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports ORDER BY created_at DESC LIMIT 3"
+                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY created_at DESC LIMIT 3"
                 )
             for r in cursor.fetchall():
                 results.append({"date": r['date'] or "最新", "text": f"{r['venue_name']}：{r['report_text']}"})
