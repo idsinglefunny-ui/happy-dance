@@ -90,7 +90,7 @@ POST 请求的 body 通过 AES 加密后以 `{"_encrypted": "base64密文"}` 发
 |------|------|
 | `backend/api/security.py` | 签名验证 + AES 加解密 |
 | `backend/api/main.py` | SecurityMiddleware 中间件 |
-| `miniprogram/src/crypto.js` | MD5 + AES 纯 JS 实现 |
+| `miniprogram/src/crypto.js` | MD5 + AES（基于 crypto-js） |
 | `miniprogram/src/request.js` | 请求封装（自动签名 + 解密） |
 
 ### 豁免路由
