@@ -58,10 +58,14 @@ export function request(options) {
       url: `${BASE_URL}${url}`,
       method: 'GET',
       data: signedParams,
+      timeout: 30000,
       success: (res) => {
         success && success(decryptResponse(res))
       },
-      fail
+      fail: (err) => {
+        console.error('[request] fail:', url, err.errMsg)
+        fail && fail(err)
+      }
     })
   } else {
     const encryptedBody = aesEncrypt(JSON.stringify(data))
@@ -70,10 +74,14 @@ export function request(options) {
       method: 'POST',
       data: { _encrypted: encryptedBody },
       header: { 'Content-Type': 'application/json' },
+      timeout: 30000,
       success: (res) => {
         success && success(decryptResponse(res))
       },
-      fail
+      fail: (err) => {
+        console.error('[request] fail:', url, err.errMsg)
+        fail && fail(err)
+      }
     })
   }
 }
