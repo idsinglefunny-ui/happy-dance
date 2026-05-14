@@ -20,13 +20,26 @@ function randomNonce() {
   return s
 }
 
+function decryptResponse(res) {
+  if (res.data && res.data.data && typeof res.data.data === 'string') {
+    try {
+      const plain = aesDecrypt(res.data.data)
+      if (plain) {
+        return { data: JSON.parse(plain), statusCode: res.statusCode }
+      }
+    } catch (e) {
+      console.error('[request] decrypt failed:', e)
+    }
+  }
+  return res
+}
+
 export function request(options) {
   const { url, method = 'GET', data = {}, success, fail } = options
 
   const t = String(Math.floor(Date.now() / 1000))
   const nonce = randomNonce()
 
-  // Merge security params
   const signedParams = { ...data, t, nonce }
   signedParams.sign = makeSign(signedParams)
 
@@ -36,21 +49,11 @@ export function request(options) {
       method: 'GET',
       data: signedParams,
       success: (res) => {
-        if (res.data && res.data.data) {
-          try {
-            const decrypted = JSON.parse(aesDecrypt(res.data.data))
-            success && success({ data: decrypted, statusCode: res.statusCode })
-          } catch (e) {
-            success && success(res)
-          }
-        } else {
-          success && success(res)
-        }
+        success && success(decryptResponse(res))
       },
       fail
     })
   } else {
-    // POST: encrypt body, sign goes in query params
     const encryptedBody = aesEncrypt(JSON.stringify(data))
     uni.request({
       url: `${BASE_URL}${url}?t=${t}&nonce=${nonce}&sign=${signedParams.sign}`,
@@ -58,16 +61,7 @@ export function request(options) {
       data: { _encrypted: encryptedBody },
       header: { 'Content-Type': 'application/json' },
       success: (res) => {
-        if (res.data && res.data.data) {
-          try {
-            const decrypted = JSON.parse(aesDecrypt(res.data.data))
-            success && success({ data: decrypted, statusCode: res.statusCode })
-          } catch (e) {
-            success && success(res)
-          }
-        } else {
-          success && success(res)
-        }
+        success && success(decryptResponse(res))
       },
       fail
     })

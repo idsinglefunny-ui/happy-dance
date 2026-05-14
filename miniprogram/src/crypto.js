@@ -1,6 +1,5 @@
-import CryptoJS from 'crypto-js'
+import * as CryptoJS from 'crypto-js'
 
-const SECRET_KEY = 'dance_king_2026_secret_key'
 const AES_KEY = CryptoJS.enc.Hex.parse('a71d42042d0e66063fae9358fd4cdfd665a257e529e5549691cc5dc076fd9daf')
 const AES_IV = CryptoJS.enc.Hex.parse('01498940ea40890cad568fce8ae04763')
 
