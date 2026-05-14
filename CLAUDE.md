@@ -56,6 +56,52 @@ npx uni build -p mp-weixin              # 生产构建 → dist/build/mp-weixin/
 - **Admin**: Vue 3, Vant 4, Vite 8
 - **Mini Program**: uni-app
 
+## API Security
+
+小程序访问 `/api/` 接口（`/api/admin/` 除外）需要签名验证，响应数据经过加密。
+
+### 请求签名
+
+每个请求必须携带三个额外参数：
+
+| 参数 | 说明 |
+|------|------|
+| `t` | 当前时间戳（秒） |
+| `nonce` | 6位随机字符串 |
+| `sign` | MD5 签名 |
+
+签名算法：`sign = MD5(所有参数按key排序拼接 + key=SECRET_KEY)`
+
+服务端校验：时间戳偏差 ≤ 5 分钟 + 签名一致，否则返回 403。
+
+### 响应加密
+
+- 算法：AES-256-CBC
+- 响应格式：`{"data": "base64加密字符串"}`
+- 客户端自动解密后得到原始 JSON
+
+### POST 请求
+
+POST 请求的 body 通过 AES 加密后以 `{"_encrypted": "base64密文"}` 发送，签名参数附在 query string。
+
+### 代码位置
+
+| 文件 | 说明 |
+|------|------|
+| `backend/api/security.py` | 签名验证 + AES 加解密 |
+| `backend/api/main.py` | SecurityMiddleware 中间件 |
+| `miniprogram/src/crypto.js` | MD5 + AES 纯 JS 实现 |
+| `miniprogram/src/request.js` | 请求封装（自动签名 + 解密） |
+
+### 豁免路由
+
+`/api/admin/*` 路由不走签名验证，由 nginx Basic Auth 保护。
+
+- **Backend**: Python 3.13, FastAPI, uvicorn, PyMySQL
+- **Database**: MySQL 8.0+ (requires POINT SRID 4326 spatial index)
+- **Admin**: Vue 3, Vant 4, Vite 8
+- **Mini Program**: uni-app
+
 ## Deploy
 
 **Production server:** `root@8.138.80.202` / `root@dance.index-tts.cn` (ssh-key login)
