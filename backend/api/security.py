@@ -3,6 +3,7 @@ import time
 import json
 import base64
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding as sym_padding
 from cryptography.hazmat.backends import default_backend
 
 SECRET_KEY = "dance_king_2026_secret_key"
@@ -46,12 +47,12 @@ def verify_sign(params: dict) -> bool:
 
 
 def aes_encrypt(data: str) -> str:
-    """AES-256-CBC encrypt, returns base64 string."""
-    pad_len = 16 - len(data.encode()) % 16
-    data_padded = data + chr(pad_len) * pad_len
+    """AES-256-CBC encrypt with PKCS7 padding, returns base64 string."""
+    padder = sym_padding.PKCS7(128).padder()
+    padded = padder.update(data.encode()) + padder.finalize()
     cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV), backend=default_backend())
     encryptor = cipher.encryptor()
-    encrypted = encryptor.update(data_padded.encode()) + encryptor.finalize()
+    encrypted = encryptor.update(padded) + encryptor.finalize()
     return base64.b64encode(encrypted).decode()
 
 
@@ -60,5 +61,6 @@ def aes_decrypt(data_b64: str) -> str:
     cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV), backend=default_backend())
     decryptor = cipher.decryptor()
     decrypted = decryptor.update(base64.b64decode(data_b64)) + decryptor.finalize()
-    pad_len = decrypted[-1]
-    return decrypted[:-pad_len].decode()
+    unpadder = sym_padding.PKCS7(128).unpadder()
+    unpadded = unpadder.update(decrypted) + unpadder.finalize()
+    return unpadded.decode()
