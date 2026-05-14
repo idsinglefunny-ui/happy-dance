@@ -353,15 +353,15 @@ def get_reports(latitude: float = None, longitude: float = None, db: pymysql.con
 
             results = []
 
-            # 1. 舞厅动态 (from dance_halls) — 只展示今天和昨天的
+            # 1. 舞厅动态 (from dance_halls) — 只展示今天和昨天的公告
             if city:
                 cursor.execute(
-                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE city = %s AND updated_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY updated_at DESC LIMIT 3",
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(moment_updated_at, '%%m-%%d') as date FROM dance_halls WHERE city = %s AND moment_updated_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY moment_updated_at DESC LIMIT 3",
                     (city,)
                 )
             else:
                 cursor.execute(
-                    "SELECT name, open_status, moment_text, DATE_FORMAT(updated_at, '%%m-%%d') as date FROM dance_halls WHERE updated_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY updated_at DESC LIMIT 3"
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(moment_updated_at, '%%m-%%d') as date FROM dance_halls WHERE moment_updated_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY moment_updated_at DESC LIMIT 3"
                 )
             for h in cursor.fetchall():
                 text = ""

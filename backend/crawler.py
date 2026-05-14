@@ -123,17 +123,17 @@ def sync_data(is_manual=False):
                 # 插入或更新 SQL
                 sql = """
                 INSERT INTO `dance_halls` (
-                    `id`, `name`, `province`, `city`, `address`, 
+                    `id`, `name`, `province`, `city`, `address`,
                     `longitude`, `latitude`, `location`,
                     `open_status`, `hot`, `cover`,
                     `morning_hours`, `afternoon_hours`, `evening_hours`,
-                    `ticket_price`, `moment_text`
+                    `ticket_price`, `moment_text`, `moment_updated_at`
                 ) VALUES (
                     %s, %s, %s, %s, %s,
                     %s, %s, ST_GeomFromText(%s, 4326),
                     %s, %s, %s,
                     %s, %s, %s,
-                    %s, %s
+                    %s, %s, NOW()
                 )
                 ON DUPLICATE KEY UPDATE
                     `name`=VALUES(`name`), `province`=VALUES(`province`), `city`=VALUES(`city`),
@@ -142,12 +142,13 @@ def sync_data(is_manual=False):
                     `location`=VALUES(`location`),
                     `open_status`=VALUES(`open_status`), `hot`=VALUES(`hot`), `cover`=VALUES(`cover`),
                     `morning_hours`=VALUES(`morning_hours`), `afternoon_hours`=VALUES(`afternoon_hours`), `evening_hours`=VALUES(`evening_hours`),
-                    `ticket_price`=VALUES(`ticket_price`), `moment_text`=VALUES(`moment_text`)
+                    `ticket_price`=VALUES(`ticket_price`), `moment_text`=VALUES(`moment_text`),
+                    `moment_updated_at`=IF(`moment_text` <> VALUES(`moment_text`), NOW(), `moment_updated_at`)
                 """
-                
+
                 # MySQL 8.0 中 SRID 4326 的格式要求为 POINT(latitude longitude)
                 point_str = f"POINT({latitude} {longitude})"
-                
+
                 try:
                     cursor.execute(sql, (
                         hall_id, name, province, city, address,
