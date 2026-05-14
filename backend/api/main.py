@@ -77,25 +77,6 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityMiddleware)
 
-def init_reports_table():
-    try:
-        conn = pymysql.connect(**crawler.DB_CONFIG)
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS dance_hall_reports (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    venue_name VARCHAR(100),
-                    report_text VARCHAR(255),
-                    reporter_name VARCHAR(50),
-                    city VARCHAR(50) DEFAULT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            """)
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        print("Failed to initialize reports table:", e)
-
 def init_system_config_table():
     try:
         conn = pymysql.connect(**crawler.DB_CONFIG)
@@ -112,7 +93,6 @@ def init_system_config_table():
     except Exception as e:
         print("Failed to initialize system_config table:", e)
 
-init_reports_table()
 init_system_config_table()
 
 def get_db():
@@ -372,49 +352,11 @@ def get_reports(latitude: float = None, longitude: float = None, db: pymysql.con
                     text = f"{h['name']}：{status_str}"
                 results.append({"date": h['date'] or "最新", "text": text})
 
-            # 2. 用户上报 (from dance_hall_reports) — 只展示今天和昨天的
-            if city:
-                cursor.execute(
-                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports WHERE city = %s AND created_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY created_at DESC LIMIT 3",
-                    (city,)
-                )
-            else:
-                cursor.execute(
-                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY created_at DESC LIMIT 3"
-                )
-            for r in cursor.fetchall():
-                results.append({"date": r['date'] or "最新", "text": f"{r['venue_name']}：{r['report_text']}"})
-
             if not results:
                 results = [
                     {"date": "今天", "text": "本市今日暂无更多最新动态"}
                 ]
             return {"code": 200, "data": results}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-class ReportCreate(BaseModel):
-    venue_name: str
-    report_text: str
-    reporter_name: str
-
-@app.post("/api/reports")
-def create_report(report: ReportCreate, db: pymysql.connections.Connection = Depends(get_db)):
-    try:
-        with db.cursor() as cursor:
-            # 自动根据 venue_name 查找城市
-            city = None
-            cursor.execute("SELECT city FROM dance_halls WHERE name = %s LIMIT 1", (report.venue_name,))
-            row = cursor.fetchone()
-            if row:
-                city = row['city']
-            cursor.execute(
-                "INSERT INTO dance_hall_reports (venue_name, report_text, reporter_name, city) VALUES (%s, %s, %s, %s)",
-                (report.venue_name, report.report_text, report.reporter_name, city)
-            )
-            db.commit()
-            return {"code": 200, "message": "上报成功"}
-    except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
