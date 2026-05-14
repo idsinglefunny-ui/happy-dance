@@ -132,20 +132,17 @@ def get_nearby_dance_halls(
             point_str = f"POINT({latitude} {longitude})"
             cursor.execute("""
                 SELECT city, ST_Distance_Sphere(location, ST_GeomFromText(%s, 4326)) as dist
-                FROM dance_halls 
-                ORDER BY dist ASC 
+                FROM dance_halls
+                ORDER BY dist ASC
                 LIMIT 1
             """, (point_str,))
             closest = cursor.fetchone()
-            
-            # 如果最近的点在 100km 以内，我们认为用户属于该城市
-            # 如果超过 100km，则认为当前位置不在数据库覆盖范围内，不进行强制城市过滤
+
             user_city = closest['city'] if closest and closest['dist'] < 100000 else None
 
             # 2. 构建查询条件
-            where_clauses = ["1=1"]
-            # 注意：第一个参数是用于 SELECT 中计算距离的 point_str
-            query_params = [] 
+            where_clauses = []
+            query_params = []
 
             if user_city:
                 where_clauses.append("city = %s")
@@ -159,15 +156,16 @@ def get_nearby_dance_halls(
                 where_clauses.append("hot = %s")
                 query_params.append(hot)
 
-            where_str = " AND ".join(where_clauses)
-            
+            where_str = " AND ".join(where_clauses) if where_clauses else "1=1"
+
             sql = f"""
-                SELECT 
+                SELECT
                     id, name, province, city, address, open_status, hot, cover,
                     morning_hours, afternoon_hours, evening_hours, ticket_price, moment_text,
                     ST_Distance_Sphere(location, ST_GeomFromText(%s, 4326)) as distance_m
                 FROM dance_halls
                 WHERE {where_str}
+                HAVING distance_m < 100000
                 ORDER BY distance_m ASC
                 LIMIT %s OFFSET %s
             """
