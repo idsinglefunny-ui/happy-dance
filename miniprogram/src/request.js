@@ -21,17 +21,27 @@ function randomNonce() {
 }
 
 function decryptResponse(res) {
-  if (res.data && res.data.data && typeof res.data.data === 'string') {
-    try {
-      const plain = aesDecrypt(res.data.data)
-      if (plain) {
-        return { data: JSON.parse(plain), statusCode: res.statusCode }
-      }
-    } catch (e) {
-      console.error('[request] decrypt failed:', e)
-    }
+  if (!res.data) {
+    console.warn('[request] no res.data')
+    return res
   }
-  return res
+  if (!res.data.data || typeof res.data.data !== 'string') {
+    console.warn('[request] res.data.data is not string:', typeof res.data.data, JSON.stringify(res.data).substring(0, 200))
+    return res
+  }
+  try {
+    const plain = aesDecrypt(res.data.data)
+    if (!plain) {
+      console.error('[request] aesDecrypt returned empty')
+      return res
+    }
+    const parsed = JSON.parse(plain)
+    console.log('[request] decrypt OK, code:', parsed.code)
+    return { data: parsed, statusCode: res.statusCode }
+  } catch (e) {
+    console.error('[request] decrypt failed:', e)
+    return res
+  }
 }
 
 export function request(options) {
