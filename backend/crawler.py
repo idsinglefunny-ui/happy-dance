@@ -137,6 +137,12 @@ def sync_data(is_manual=False):
                 evening_hours = detail.get('eveningOpenCloseTime', '')
                 ticket_price = detail.get('ticket', '')
                 moment_text = detail.get('moment', '')
+                # 过滤垃圾信息
+                SPAM_KEYWORDS = ['商K可安排']
+                for kw in SPAM_KEYWORDS:
+                    if kw in moment_text:
+                        moment_text = ''
+                        break
                 cover = detail.get('cover', '')
 
                 # 计算 moment_updated_at
