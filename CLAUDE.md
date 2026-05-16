@@ -148,7 +148,18 @@ Admin 后台使用 nginx HTTP Basic Auth 保护：
 
 ### Database
 
-External MySQL at `117.72.76.53:63306`, database `king_dance`.
+Local MySQL 8.0 on the same server (`127.0.0.1:3306`), database `king_dance`, user `spto_xyz`.
+
+### Crawler Schedule
+
+Cron 定时任务（通过 `/root/happy-dance/backend/run_crawler.sh` 执行）：
+
+| 时间 | 说明 |
+|------|------|
+| 11:30 | 每天早上执行一次 |
+| 13:00-22:00 | 每小时整点执行一次 |
+
+执行失败时通过飞书 webhook 发送告警到群（`send_alert.py`），日志输出到 `/var/log/happy-dance-crawler.log`。
 
 ### Build & Deploy (from local machine)
 
