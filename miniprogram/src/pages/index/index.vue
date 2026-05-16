@@ -28,14 +28,14 @@
       </view>
     </view>
 
-    <!-- Real-time Marquee / Bullet Screen -->
+    <!-- Real-time Marquee -->
     <view class="marquee-container">
       <view class="marquee-label">
         <text class="dot"></text>
         <text>最新动态</text>
       </view>
       <view class="marquee-box">
-        <view class="marquee-track">
+        <view class="marquee-track" :style="{animationDuration: marqueeDuration}">
           <text class="marquee-item" v-for="(item, idx) in marqueeList" :key="idx">
             【{{ item.date }}】{{ item.text }}
           </text>
@@ -98,6 +98,16 @@ const currentCity = ref('');
 const userCoords = ref(null);
 
 const marqueeList = ref([]);
+const marqueeDuration = computed(() => {
+  if (marqueeList.value.length === 0) return '20s';
+  // 按每条 ~8 秒计算总时长，保证固定速度
+  const total = marqueeList.value.reduce((sum, item) => {
+    const len = (item.text || '').length + (item.date || '').length + 5;
+    return sum + len;
+  }, 0);
+  // 每个字符约 0.3 秒，最少 15 秒
+  return Math.max(15, total * 0.3) + 's';
+});
 
 const fetchVenues = (page = 1) => {
   if (!userCoords.value) return;
@@ -469,7 +479,7 @@ page {
 .marquee-track {
   display: flex;
   white-space: nowrap;
-  animation: scroll-text 15s linear infinite;
+  animation: scroll-text linear infinite;
 }
 .marquee-item {
   font-size: 26rpx;
@@ -478,7 +488,7 @@ page {
 }
 @keyframes scroll-text {
   0% {
-    transform: translateX(450rpx);
+    transform: translateX(100%);
   }
   100% {
     transform: translateX(-100%);

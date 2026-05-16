@@ -341,7 +341,8 @@ def get_reports(latitude: float = None, longitude: float = None, db: pymysql.con
                 )
             else:
                 cursor.execute(
-                    "SELECT name, open_status, moment_text, DATE_FORMAT(moment_updated_at, '%%m-%%d') as date FROM dance_halls WHERE moment_updated_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY moment_updated_at DESC LIMIT 3"
+                    "SELECT name, open_status, moment_text, DATE_FORMAT(moment_updated_at, '%%m-%%d') as date FROM dance_halls WHERE moment_updated_at >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY moment_updated_at DESC LIMIT 3",
+                    ()
                 )
             for h in cursor.fetchall():
                 text = ""
@@ -351,6 +352,21 @@ def get_reports(latitude: float = None, longitude: float = None, db: pymysql.con
                     status_str = "正常营业" if h['open_status'] == 1 else "休息中"
                     text = f"{h['name']}：{status_str}"
                 results.append({"date": h['date'] or "最新", "text": text})
+
+            # 2. 用户上报 (from dance_hall_reports)
+            if city:
+                cursor.execute(
+                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports WHERE city = %s AND DATE(created_at) = CURDATE() ORDER BY created_at DESC LIMIT 3",
+                    (city,)
+                )
+            else:
+                cursor.execute(
+                    "SELECT venue_name, report_text, DATE_FORMAT(created_at, '%%m-%%d') as date FROM dance_hall_reports WHERE DATE(created_at) = CURDATE() ORDER BY created_at DESC LIMIT 3",
+                    ()
+                )
+            for r in cursor.fetchall():
+                results.append({"date": r['date'] or "最新", "text": f"{r['venue_name']}：{r['report_text']}"})
+
 
             if not results:
                 results = [
