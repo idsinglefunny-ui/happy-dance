@@ -174,6 +174,8 @@ def sync_data(is_manual=False):
 
             # 自动补齐空 city/province 字段
             backfill_location_fields(cursor)
+            # 从 moment_text 解析公告日期
+            backfill_moment_updated_at(cursor)
             connection.commit()
 
             return {"synced_count": success_count}
@@ -282,6 +284,32 @@ def backfill_location_fields(cursor):
 
     if city_updated > 0 or province_updated > 0:
         print(f" -> 自动补齐/标准化 {city_updated} 条 city, {province_updated} 条 province")
+
+def backfill_moment_updated_at(cursor):
+    """从 moment_text 解析公告日期，更新 moment_updated_at"""
+    import re
+    from datetime import datetime
+    year = datetime.now().year
+    cursor.execute("SELECT id, moment_text, moment_updated_at FROM dance_halls WHERE moment_text IS NOT NULL AND moment_text != ''")
+    rows = cursor.fetchall()
+    updated = 0
+    for r in rows:
+        text = r['moment_text'] or ''
+        m = re.match(r'(\d{1,2})月(\d{1,2})日', text)
+        if m:
+            month, day = int(m.group(1)), int(m.group(2))
+            try:
+                d = datetime(year, month, day).date()
+                if d > datetime.now().date():
+                    d = datetime(year - 1, month, day).date()
+                dt = d.strftime('%Y-%m-%d 00:00:00')
+                if str(r['moment_updated_at']) != dt:
+                    cursor.execute("UPDATE dance_halls SET moment_updated_at = %s WHERE id = %s", (dt, r['id']))
+                    updated += 1
+            except ValueError:
+                pass
+    if updated > 0:
+        print(f" -> 解析并更新 {updated} 条公告日期")
 
 if __name__ == "__main__":
     sync_data(is_manual=True)
