@@ -1,5 +1,13 @@
 <template>
   <view class="container">
+    <!-- Loading -->
+    <view class="loading-container" v-if="loading">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- Content -->
+    <view v-else>
     <!-- Top Image Banner -->
     <view class="banner-section">
       <image class="banner-img" :src="venue.cover || 'https://images.unsplash.com/photo-1545128485-c400e7702796?w=750&auto=format&fit=crop&q=80'" mode="aspectFill"></image>
@@ -66,6 +74,7 @@
         <text class="detail-line">地址：{{ venue.province || '' }}{{ venue.city || '' }}{{ venue.address || '' }}</text>
       </view>
     </view>
+    </view>
   </view>
 </template>
 
@@ -75,70 +84,27 @@ import { onLoad } from '@dcloudio/uni-app';
 import { request } from '@/request.js'
 
 const venue = ref({});
+const loading = ref(true);
 
-const showLocationFail = () => {
-  uni.showModal({
-    title: '定位失败',
-    content: '无法获取您的位置，无法根据位置查看相关信息。请检查是否开启了定位权限。',
-    showCancel: false,
-    confirmText: '知道了'
-  });
-};
-
-const doGetLocation = () => {
-  return new Promise((resolve) => {
-    uni.getLocation({
-      type: 'gcj02',
-      success: (res) => resolve({ latitude: res.latitude, longitude: res.longitude }),
-      fail: () => {
-        showLocationFail();
-        resolve(null);
-      }
-    });
-  });
-};
-
-const requestLocation = () => {
-  return new Promise((resolve) => {
-    uni.getSetting({
-      success: (settingRes) => {
-        if (settingRes.authSetting['scope.userLocation'] === false) {
-          uni.showModal({
-            title: '定位权限',
-            content: '需要获取您的位置才能计算距离，请在设置中开启定位权限。',
-            confirmText: '去设置',
-            success: (modalRes) => {
-              if (modalRes.confirm) {
-                uni.openSetting({
-                  success: (openRes) => {
-                    if (openRes.authSetting['scope.userLocation']) {
-                      doGetLocation().then(resolve);
-                    } else {
-                      showLocationFail();
-                      resolve(null);
-                    }
-                  }
-                });
-              } else {
-                showLocationFail();
-                resolve(null);
-              }
-            }
-          });
-        } else {
-          doGetLocation().then(resolve);
-        }
-      }
-    });
-  });
-};
-
-onLoad(async (options) => {
+onLoad((options) => {
   const id = options.id;
   if (!id) return;
 
-  const loc = await requestLocation();
+  // 优先用首页传入的坐标，避免重复定位
+  let coords = null;
+  if (options.lat && options.lng) {
+    coords = { latitude: parseFloat(options.lat), longitude: parseFloat(options.lng) };
+  }
 
+  if (coords) {
+    fetchDetail(id, coords);
+  } else {
+    // 没有传入坐标，走定位流程
+    requestLocation().then((loc) => fetchDetail(id, loc));
+  }
+});
+
+const fetchDetail = (id, loc) => {
   request({
     url: `/api/dance-halls/${id}`,
     data: loc ? { latitude: loc.latitude, longitude: loc.longitude } : {},
@@ -148,9 +114,14 @@ onLoad(async (options) => {
       } else {
         uni.showToast({ title: '加载失败', icon: 'none' });
       }
+      loading.value = false;
+    },
+    fail: () => {
+      loading.value = false;
+      uni.showToast({ title: '网络请求失败', icon: 'none' });
     }
   });
-});
+};
 
 const goToClaim = () => {
   uni.navigateTo({ url: '/pages/claim/claim' });
@@ -171,6 +142,32 @@ const openLocation = () => {
 </script>
 
 <style>
+page {
+  background-color: #ffffff;
+}
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+}
+.loading-spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border: 4rpx solid #e5e7eb;
+  border-top-color: #111827;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 20rpx;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loading-text {
+  font-size: 28rpx;
+  color: #6b7280;
+}
 page {
   background-color: #ffffff;
   color: #111827;

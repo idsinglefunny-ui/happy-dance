@@ -259,7 +259,13 @@ const isInBusinessHours = (venue) => {
     .map(parseTimeRange)
     .filter(Boolean);
   if (ranges.length === 0) return true; // 没有时间数据默认算营业中
-  return ranges.some(r => nowMin >= r.start && nowMin <= r.end);
+  return ranges.some(r => {
+    if (r.end < r.start) {
+      // 跨午夜，如 19:30-01:30
+      return nowMin >= r.start || nowMin <= r.end;
+    }
+    return nowMin >= r.start && nowMin <= r.end;
+  });
 };
 
 const getStatusText = (venue) => {
@@ -307,8 +313,11 @@ const toggleHotFilter = () => {
 
 const goToDetail = (id) => {
   if(id) {
+    const coords = userCoords.value;
+    const lat = coords ? `&lat=${coords.latitude}` : '';
+    const lng = coords ? `&lng=${coords.longitude}` : '';
     uni.navigateTo({
-      url: `/pages/detail/detail?id=${id}`
+      url: `/pages/detail/detail?id=${id}${lat}${lng}`
     });
   }
 };
