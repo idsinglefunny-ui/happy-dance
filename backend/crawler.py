@@ -67,6 +67,25 @@ def fetch_detail(hall_id):
         print(f"[Exception] 详情请求失败 {hall_id}: {e}")
         return None
 
+def parse_moment_date(text):
+    """从 moment_text 开头解析日期，返回 datetime 或 None"""
+    if not text:
+        return None
+    import re
+    from datetime import datetime
+    year = datetime.now().year
+    m = re.match(r'(\d{1,2})月(\d{1,2})日', text)
+    if m:
+        month, day = int(m.group(1)), int(m.group(2))
+        try:
+            d = datetime(year, month, day)
+            if d.date() > datetime.now().date():
+                d = datetime(year - 1, month, day)
+            return d
+        except ValueError:
+            return None
+    return None
+
 def sync_data(is_manual=False):
     """
     数据抓取与入库同步主逻辑
@@ -119,7 +138,20 @@ def sync_data(is_manual=False):
                 ticket_price = detail.get('ticket', '')
                 moment_text = detail.get('moment', '')
                 cover = detail.get('cover', '')
-                
+
+                # 计算 moment_updated_at
+                if moment_text:
+                    parsed = parse_moment_date(moment_text)
+                    if parsed:
+                        # 公告有日期 → 用解析出的日期
+                        moment_updated_at = parsed
+                    else:
+                        # 公告没日期 → 先设 NULL，SQL 中按内容变化决定
+                        moment_updated_at = None
+                else:
+                    # 没有公告 → 不动
+                    moment_updated_at = None
+
                 # 插入或更新 SQL
                 sql = """
                 INSERT INTO `dance_halls` (
@@ -133,7 +165,7 @@ def sync_data(is_manual=False):
                     %s, %s, ST_GeomFromText(%s, 4326),
                     %s, %s, %s,
                     %s, %s, %s,
-                    %s, %s, NOW()
+                    %s, %s, COALESCE(%s, NOW())
                 )
                 ON DUPLICATE KEY UPDATE
                     `name`=VALUES(`name`), `province`=IF(VALUES(`province`)='', `province`, VALUES(`province`)), `city`=IF(VALUES(`city`)='', `city`, VALUES(`city`)),
@@ -143,7 +175,12 @@ def sync_data(is_manual=False):
                     `open_status`=VALUES(`open_status`), `hot`=VALUES(`hot`), `cover`=VALUES(`cover`),
                     `morning_hours`=VALUES(`morning_hours`), `afternoon_hours`=VALUES(`afternoon_hours`), `evening_hours`=VALUES(`evening_hours`),
                     `ticket_price`=VALUES(`ticket_price`), `moment_text`=VALUES(`moment_text`),
-                    `moment_updated_at`=IF(`moment_text` <> VALUES(`moment_text`), NOW(), `moment_updated_at`)
+                    `moment_updated_at`=CASE
+                        WHEN VALUES(`moment_text`) = '' THEN `moment_updated_at`
+                        WHEN VALUES(`moment_updated_at`) IS NOT NULL THEN VALUES(`moment_updated_at`)
+                        WHEN `moment_text` <> VALUES(`moment_text`) THEN NOW()
+                        ELSE `moment_updated_at`
+                    END
                 """
 
                 # MySQL 8.0 中 SRID 4326 的格式要求为 POINT(latitude longitude)
@@ -155,7 +192,7 @@ def sync_data(is_manual=False):
                         longitude, latitude, point_str,
                         status, hot, cover,
                         morning_hours, afternoon_hours, evening_hours,
-                        ticket_price, moment_text
+                        ticket_price, moment_text, moment_updated_at
                     ))
                     success_count += 1
                     
@@ -174,8 +211,6 @@ def sync_data(is_manual=False):
 
             # 自动补齐空 city/province 字段
             backfill_location_fields(cursor)
-            # 从 moment_text 解析公告日期
-            backfill_moment_updated_at(cursor)
             connection.commit()
 
             return {"synced_count": success_count}
@@ -284,32 +319,6 @@ def backfill_location_fields(cursor):
 
     if city_updated > 0 or province_updated > 0:
         print(f" -> 自动补齐/标准化 {city_updated} 条 city, {province_updated} 条 province")
-
-def backfill_moment_updated_at(cursor):
-    """从 moment_text 解析公告日期，更新 moment_updated_at"""
-    import re
-    from datetime import datetime
-    year = datetime.now().year
-    cursor.execute("SELECT id, moment_text, moment_updated_at FROM dance_halls WHERE moment_text IS NOT NULL AND moment_text != ''")
-    rows = cursor.fetchall()
-    updated = 0
-    for r in rows:
-        text = r['moment_text'] or ''
-        m = re.match(r'(\d{1,2})月(\d{1,2})日', text)
-        if m:
-            month, day = int(m.group(1)), int(m.group(2))
-            try:
-                d = datetime(year, month, day).date()
-                if d > datetime.now().date():
-                    d = datetime(year - 1, month, day).date()
-                dt = d.strftime('%Y-%m-%d 00:00:00')
-                if str(r['moment_updated_at']) != dt:
-                    cursor.execute("UPDATE dance_halls SET moment_updated_at = %s WHERE id = %s", (dt, r['id']))
-                    updated += 1
-            except ValueError:
-                pass
-    if updated > 0:
-        print(f" -> 解析并更新 {updated} 条公告日期")
 
 if __name__ == "__main__":
     sync_data(is_manual=True)
