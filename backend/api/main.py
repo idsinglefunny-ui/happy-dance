@@ -96,7 +96,24 @@ def init_reports_table():
     except Exception as e:
         print("Failed to initialize reports table:", e)
 
+def init_system_config_table():
+    try:
+        conn = pymysql.connect(**crawler.DB_CONFIG)
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS system_config (
+                    config_key VARCHAR(50) PRIMARY KEY,
+                    config_value TEXT,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                );
+            """)
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print("Failed to initialize system_config table:", e)
+
 init_reports_table()
+init_system_config_table()
 
 def get_db():
     conn = pymysql.connect(**crawler.DB_CONFIG)
@@ -220,6 +237,48 @@ def admin_trigger_sync():
     try:
         res = crawler.trigger_sync(is_manual=True)
         return {"code": 200, "data": res}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/config")
+def get_config(db: pymysql.connections.Connection = Depends(get_db)):
+    """获取系统配置（公开接口）"""
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("SELECT config_key, config_value FROM system_config")
+            rows = cursor.fetchall()
+            config = {row['config_key']: row['config_value'] for row in rows}
+            return {"code": 200, "data": config}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class ConfigItem(BaseModel):
+    config_key: str
+    config_value: str
+
+@app.get("/api/admin/config")
+def admin_get_config(db: pymysql.connections.Connection = Depends(get_db)):
+    """获取系统配置（管理接口）"""
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("SELECT config_key, config_value FROM system_config")
+            rows = cursor.fetchall()
+            config = {row['config_key']: row['config_value'] for row in rows}
+            return {"code": 200, "data": config}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/admin/config")
+def admin_set_config(item: ConfigItem, db: pymysql.connections.Connection = Depends(get_db)):
+    """设置系统配置（管理接口）"""
+    try:
+        with db.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO system_config (config_key, config_value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE config_value = %s",
+                (item.config_key, item.config_value, item.config_value)
+            )
+            db.commit()
+            return {"code": 200, "message": "配置已更新"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

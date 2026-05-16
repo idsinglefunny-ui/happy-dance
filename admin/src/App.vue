@@ -32,6 +32,20 @@
               </template>
             </van-cell>
           </van-cell-group>
+          <van-cell-group inset style="margin-top: 16px">
+            <van-cell title="首页 Banner 图">
+              <template #label>
+                <van-field v-model="bannerUrl" placeholder="输入图片 URL" type="url" />
+                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                  <van-button size="small" type="primary" :loading="savingBanner" @click="saveBanner">保存</van-button>
+                  <van-button size="small" @click="bannerUrl = ''">清空</van-button>
+                </div>
+                <div v-if="bannerUrl" style="margin-top: 8px;">
+                  <img :src="bannerUrl" style="width: 100%; border-radius: 8px; max-height: 120px; object-fit: cover;" />
+                </div>
+              </template>
+            </van-cell>
+          </van-cell-group>
         </div>
       </van-tab>
     </van-tabs>
@@ -49,6 +63,39 @@ const claims = ref([
   { id: 1, venue_name: "成都星海壹号", city: "成都市", applicant_name: "张总", relationship: "老板", contact_phone: "13800001111" }
 ]);
 const syncing = ref(false);
+const bannerUrl = ref('');
+const savingBanner = ref(false);
+
+// 加载已有配置
+axios.get('/api/admin/config').then(res => {
+  // admin 接口不走签名，但 admin 的 nginx proxy 也返回加密数据
+  // 直接用 admin 路由（免签名）获取
+}).catch(() => {});
+
+const loadBannerConfig = async () => {
+  try {
+    const res = await axios.get('/api/admin/config');
+    if (res.data && res.data.code === 200 && res.data.data) {
+      bannerUrl.value = res.data.data.banner_url || '';
+    }
+  } catch (e) {}
+};
+loadBannerConfig();
+
+const saveBanner = async () => {
+  savingBanner.value = true;
+  try {
+    await axios.post('/api/admin/config', {
+      config_key: 'banner_url',
+      config_value: bannerUrl.value
+    });
+    showToast('Banner 已保存');
+  } catch (e) {
+    showToast('保存失败');
+  } finally {
+    savingBanner.value = false;
+  }
+};
 
 const approve = (id) => {
   showDialog({ title: '确认', message: '确认审核通过该认领申请？' }).then(() => {

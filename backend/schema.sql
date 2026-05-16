@@ -71,3 +71,10 @@ CREATE TABLE IF NOT EXISTS `advertisements` (
   `sort_weight` INT DEFAULT 0 COMMENT '用于控制在列表中的插入位置',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 5. 系统配置表 (System Config)
+CREATE TABLE IF NOT EXISTS `system_config` (
+  `config_key` VARCHAR(50) PRIMARY KEY,
+  `config_value` TEXT,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Project Overview
 
 舞王 (Dance King) — 舞厅信息聚合平台，包含数据爬虫、API 后端、管理后台和微信小程序。
@@ -8,12 +10,16 @@
 
 ```
 backend/          — Python FastAPI backend (uvicorn, port 12800)
-  api/main.py       — FastAPI app with all API routes
-  crawler.py        — 数据抓取引擎 (从舞图图抓取)
-  schema.sql        — MySQL schema
+  api/main.py       — FastAPI app with all API routes + middleware (monolithic, ~360 lines)
+  api/security.py   — 签名验证 + AES-256-CBC 加解密
+  crawler.py        — 数据抓取引擎 (从舞图图 api.dancehallmap.com 抓取)
+  init_db.py        — 初始化数据库 (创建表)
+  schema.sql        — MySQL schema (不含 dance_hall_reports 表，该表在 app 启动时动态创建)
 admin/            — Vue 3 + Vant 管理后台 (Vite build)
-danceKing-ui/     — 微信小程序前端 (uni-app)
-  src/config.js      — API 地址配置 (根据环境自动切换)
+miniprogram/      — 微信小程序前端 (uni-app 3.0)
+  src/config.js      — API 地址配置 (根据 Vite 环境变量自动切换)
+  src/request.js     — 请求封装（自动签名 + 加密/解密）
+  src/crypto.js      — MD5 + AES（与 backend/api/security.py 对应）
 ```
 
 ## Build & Run Commands
@@ -24,18 +30,31 @@ cd backend
 uv sync                                          # install deps (Python >=3.13, uses uv)
 uvicorn api.main:app --host 0.0.0.0 --port 12800 # run dev server
 
-# Admin frontend
-cd admin
-npm install && npx vite build                    # build to admin/dist/
+# Initialize database
+cd backend && python init_db.py
 
 # Run crawler manually
 cd backend && python crawler.py
 
+# Admin frontend
+cd admin
+npm install && npx vite build                    # build to admin/dist/
+
 # Mini Program (微信小程序)
-cd danceKing-ui
+cd miniprogram
 npm install
 npx uni -p mp-weixin                    # 开发模式 → dist/dev/mp-weixin/
 npx uni build -p mp-weixin              # 生产构建 → dist/build/mp-weixin/
+```
+
+## Testing
+
+No test framework is configured. Two manual test scripts exist:
+
+```bash
+cd backend
+python -m api.test_api               # FastAPI TestClient tests (GET /api/dance-halls, POST /api/claims)
+python test_api.py                    # Standalone script testing external API connectivity
 ```
 
 ## Mini Program Environment Config
@@ -54,7 +73,7 @@ npx uni build -p mp-weixin              # 生产构建 → dist/build/mp-weixin/
 - **Backend**: Python 3.13, FastAPI, uvicorn, PyMySQL
 - **Database**: MySQL 8.0+ (requires POINT SRID 4326 spatial index)
 - **Admin**: Vue 3, Vant 4, Vite 8
-- **Mini Program**: uni-app
+- **Mini Program**: uni-app 3.0, crypto-js
 
 ## API Security
 
@@ -96,11 +115,6 @@ POST 请求的 body 通过 AES 加密后以 `{"_encrypted": "base64密文"}` 发
 ### 豁免路由
 
 `/api/admin/*` 路由不走签名验证，由 nginx Basic Auth 保护。
-
-- **Backend**: Python 3.13, FastAPI, uvicorn, PyMySQL
-- **Database**: MySQL 8.0+ (requires POINT SRID 4326 spatial index)
-- **Admin**: Vue 3, Vant 4, Vite 8
-- **Mini Program**: uni-app
 
 ## Deploy
 

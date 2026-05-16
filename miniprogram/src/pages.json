@@ -3,7 +3,7 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "全国舞讯",
+				"navigationBarTitleText": "快乐舞王",
 				"navigationBarBackgroundColor": "#ffffff",
 				"navigationBarTextStyle": "black"
 			}
@@ -43,7 +43,7 @@
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "莎莎舞厅",
+		"navigationBarTitleText": "舞厅",
 		"navigationBarBackgroundColor": "#ffffff",
 		"backgroundColor": "#ffffff"
 	},

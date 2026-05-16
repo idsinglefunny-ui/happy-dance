@@ -76,24 +76,80 @@ import { request } from '@/request.js'
 
 const venue = ref({});
 
-onLoad((options) => {
-  const id = options.id;
-  if (id) {
-    request({
-      url: `/api/dance-halls/${id}`,
-      data: {
-        latitude: 30.6586,
-        longitude: 104.0648
-      },
-      success: (res) => {
-        if(res.data && res.data.code === 200) {
-          venue.value = res.data.data;
+const showLocationFail = () => {
+  uni.showModal({
+    title: '定位失败',
+    content: '无法获取您的位置，无法根据位置查看相关信息。请检查是否开启了定位权限。',
+    showCancel: false,
+    confirmText: '知道了'
+  });
+};
+
+const doGetLocation = () => {
+  return new Promise((resolve) => {
+    uni.getLocation({
+      type: 'gcj02',
+      success: (res) => resolve({ latitude: res.latitude, longitude: res.longitude }),
+      fail: () => {
+        showLocationFail();
+        resolve(null);
+      }
+    });
+  });
+};
+
+const requestLocation = () => {
+  return new Promise((resolve) => {
+    uni.getSetting({
+      success: (settingRes) => {
+        if (settingRes.authSetting['scope.userLocation'] === false) {
+          uni.showModal({
+            title: '定位权限',
+            content: '需要获取您的位置才能计算距离，请在设置中开启定位权限。',
+            confirmText: '去设置',
+            success: (modalRes) => {
+              if (modalRes.confirm) {
+                uni.openSetting({
+                  success: (openRes) => {
+                    if (openRes.authSetting['scope.userLocation']) {
+                      doGetLocation().then(resolve);
+                    } else {
+                      showLocationFail();
+                      resolve(null);
+                    }
+                  }
+                });
+              } else {
+                showLocationFail();
+                resolve(null);
+              }
+            }
+          });
         } else {
-          uni.showToast({ title: '加载失败', icon: 'none' });
+          doGetLocation().then(resolve);
         }
       }
     });
-  }
+  });
+};
+
+onLoad(async (options) => {
+  const id = options.id;
+  if (!id) return;
+
+  const loc = await requestLocation();
+
+  request({
+    url: `/api/dance-halls/${id}`,
+    data: loc ? { latitude: loc.latitude, longitude: loc.longitude } : {},
+    success: (res) => {
+      if(res.data && res.data.code === 200) {
+        venue.value = res.data.data;
+      } else {
+        uni.showToast({ title: '加载失败', icon: 'none' });
+      }
+    }
+  });
 });
 
 const goToClaim = () => {

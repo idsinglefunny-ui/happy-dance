@@ -1,14 +1,18 @@
 <template>
   <view class="container">
     <!-- Top Banner -->
-    <view class="banner">
+    <view class="banner" :class="{ 'has-bg': bannerUrl }">
+      <image v-if="bannerUrl" class="banner-bg" :src="bannerUrl" mode="aspectFill" />
       <view class="banner-gradient">
-        <text class="banner-title">{{ currentCity ? currentCity + '莎莎舞厅' : '全国莎莎舞厅' }}</text>
-        <view class="location-badge" v-if="currentCity">
-          <text class="location-icon">📍</text>
-          <text>{{ currentCity }}</text>
+        <text class="banner-title">舞榭歌台，一图尽收</text>
+        <view class="banner-sub-row">
+          <text class="banner-subtitle">腰未动，心先摇；足方举，意已飘。</text>
+          <text class="banner-dot" v-if="currentCity">·</text>
+          <view class="location-badge" v-if="currentCity">
+            <text>{{ currentCity }}</text>
+            <text class="location-icon">📍</text>
+          </view>
         </view>
-        <text class="banner-subtitle" v-else>探索全国舞讯 · 计时体验升级</text>
       </view>
     </view>
 
@@ -41,10 +45,10 @@
 
     <!-- Filter -->
     <view class="filter-section scroll-x">
-      <view :class="['filter-btn', currentFilter === 'all' ? 'active' : '']" @click="setFilter('all')">全部</view>
-      <view :class="['filter-btn', currentFilter === 'open' ? 'active' : '']" @click="setFilter('open')">今日营业</view>
-      <view :class="['filter-btn', currentFilter === 'closed' ? 'active' : '']" @click="setFilter('closed')">今日停业</view>
-      <view :class="['filter-btn', currentFilter === 'hot' ? 'active' : '']" @click="setFilter('hot')">🔥 热门</view>
+      <view :class="['filter-btn', !statusFilter ? 'active' : '']" @click="setStatusFilter(null)">全部</view>
+      <view :class="['filter-btn', statusFilter === 'open' ? 'active' : '']" @click="setStatusFilter('open')">今日营业</view>
+      <view :class="['filter-btn', statusFilter === 'closed' ? 'active' : '']" @click="setStatusFilter('closed')">今日停业</view>
+      <view :class="['filter-btn', hotFilter ? 'active' : '']" @click="toggleHotFilter">🔥 热门</view>
     </view>
 
     <!-- Venue List -->
@@ -52,8 +56,8 @@
       <view class="venue-card" v-for="(venue, index) in filteredVenues" :key="index" @click="goToDetail(venue.id)">
         <view class="card-header">
           <text class="venue-name">{{ venue.name }}</text>
-          <view :class="['status-tag', venue.open_status ? 'status-open' : 'status-closed']">
-            {{ venue.open_status ? '营业中' : '休息中' }}
+          <view :class="['status-tag', getStatusClass(venue)]">
+            {{ getStatusText(venue) }}
           </view>
         </view>
         
@@ -85,26 +89,30 @@ import { onReachBottom } from '@dcloudio/uni-app';
 import { request } from '@/request.js'
 
 const venues = ref([]);
-const currentFilter = ref('all');
+const bannerUrl = ref('');
+const statusFilter = ref(null); // 'open' | 'closed' | null
+const hotFilter = ref(false);
 const currentPage = ref(1);
 const hasMore = ref(true);
 const currentCity = ref('');
-const userCoords = ref({ latitude: 30.6586, longitude: 104.0648 }); // 默认成都
+const userCoords = ref(null);
 
 const marqueeList = ref([]);
 
 const fetchVenues = (page = 1) => {
+  if (!userCoords.value) return;
   const params = {
     page: page,
     page_size: 10,
     latitude: userCoords.value.latitude,
     longitude: userCoords.value.longitude
   };
-  if (currentFilter.value === 'open') {
+  if (statusFilter.value === 'open') {
     params.open_status = 1;
-  } else if (currentFilter.value === 'closed') {
+  } else if (statusFilter.value === 'closed') {
     params.open_status = 0;
-  } else if (currentFilter.value === 'hot') {
+  }
+  if (hotFilter.value) {
     params.hot = 1;
   }
 
@@ -133,6 +141,7 @@ const fetchVenues = (page = 1) => {
 };
 
 const fetchReports = () => {
+  if (!userCoords.value) return;
   request({
     url: '/api/reports',
     data: {
@@ -147,21 +156,59 @@ const fetchReports = () => {
   });
 };
 
+const fetchBanner = () => {
+  request({
+    url: '/api/config',
+    success: (res) => {
+      if (res.data && res.data.code === 200 && res.data.data) {
+        bannerUrl.value = res.data.data.banner_url || '';
+      }
+    }
+  });
+};
+
+const showLocationFail = () => {
+  uni.showModal({
+    title: '定位失败',
+    content: '无法获取您的位置，无法根据位置查看相关信息。请检查是否开启了定位权限。',
+    showCancel: false,
+    confirmText: '知道了'
+  });
+};
+
 const getLocation = () => {
   return new Promise((resolve) => {
     // #ifdef MP-WEIXIN || APP-PLUS
-    uni.getLocation({
-      type: 'gcj02',
-      success: (res) => {
-        userCoords.value = {
-          latitude: res.latitude,
-          longitude: res.longitude
-        };
-        resolve();
-      },
-      fail: (err) => {
-        console.warn('获取定位失败:', err);
-        resolve();
+    uni.getSetting({
+      success: (settingRes) => {
+        if (settingRes.authSetting['scope.userLocation'] === false) {
+          // 用户之前拒绝过，引导去设置页开启
+          uni.showModal({
+            title: '定位权限',
+            content: '需要获取您的位置才能推荐附近舞厅，请在设置中开启定位权限。',
+            confirmText: '去设置',
+            success: (modalRes) => {
+              if (modalRes.confirm) {
+                uni.openSetting({
+                  success: (openRes) => {
+                    if (openRes.authSetting['scope.userLocation']) {
+                      doGetLocation(resolve);
+                    } else {
+                      showLocationFail();
+                      resolve();
+                    }
+                  }
+                });
+              } else {
+                showLocationFail();
+                resolve();
+              }
+            }
+          });
+        } else {
+          // 未授权过或已授权，直接请求定位
+          doGetLocation(resolve);
+        }
       }
     });
     // #endif
@@ -171,10 +218,58 @@ const getLocation = () => {
   });
 };
 
-onMounted(async () => {
-  await getLocation();
-  fetchReports();
-  fetchVenues(1);
+const doGetLocation = (resolve) => {
+  uni.getLocation({
+    type: 'gcj02',
+    success: (res) => {
+      userCoords.value = {
+        latitude: res.latitude,
+        longitude: res.longitude
+      };
+      resolve();
+    },
+    fail: () => {
+      showLocationFail();
+      resolve();
+    }
+  });
+};
+
+const parseTimeRange = (str) => {
+  if (!str) return null;
+  const m = str.match(/(\d{1,2}):(\d{2})\s*[-~—]\s*(\d{1,2}):(\d{2})/);
+  if (!m) return null;
+  return { start: parseInt(m[1]) * 60 + parseInt(m[2]), end: parseInt(m[3]) * 60 + parseInt(m[4]) };
+};
+
+const isInBusinessHours = (venue) => {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const ranges = [venue.morning_hours, venue.afternoon_hours, venue.evening_hours]
+    .map(parseTimeRange)
+    .filter(Boolean);
+  if (ranges.length === 0) return true; // 没有时间数据默认算营业中
+  return ranges.some(r => nowMin >= r.start && nowMin <= r.end);
+};
+
+const getStatusText = (venue) => {
+  if (!venue.open_status) return '暂停营业';
+  if (!isInBusinessHours(venue)) return '未到营业时间';
+  return '营业中';
+};
+
+const getStatusClass = (venue) => {
+  if (!venue.open_status) return 'status-closed';
+  if (!isInBusinessHours(venue)) return 'status-waiting';
+  return 'status-open';
+};
+
+onMounted(() => {
+  fetchBanner();
+  getLocation().then(() => {
+    fetchReports();
+    fetchVenues(1);
+  });
 });
 
 onReachBottom(() => {
@@ -184,8 +279,16 @@ onReachBottom(() => {
   }
 });
 
-const setFilter = (type) => {
-  currentFilter.value = type;
+const setStatusFilter = (status) => {
+  statusFilter.value = status;
+  currentPage.value = 1;
+  hasMore.value = true;
+  venues.value = [];
+  fetchVenues(1);
+};
+
+const toggleHotFilter = () => {
+  hotFilter.value = !hotFilter.value;
   currentPage.value = 1;
   hasMore.value = true;
   venues.value = [];
@@ -228,47 +331,72 @@ page {
 }
 .banner {
   width: 100%;
-  height: 240rpx;
-  background: #f3f4f6;
+  height: 300rpx;
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
   position: relative;
   overflow: hidden;
 }
-.banner-gradient {
+.banner.has-bg {
+  background: none;
+}
+.banner-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  padding: 40rpx;
+}
+.banner-gradient {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 50rpx 40rpx;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
+.has-bg .banner-gradient {
+  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
+}
 .banner-title {
-  font-size: 38rpx;
+  font-size: 40rpx;
   font-weight: bold;
-  color: #111827;
+  color: #ffffff;
   letter-spacing: 2rpx;
   margin-bottom: 12rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.3);
 }
 .banner-subtitle {
   font-size: 24rpx;
-  color: #6b7280;
+  color: rgba(255,255,255,0.8);
+}
+.banner-sub-row {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+  flex-wrap: wrap;
+}
+.banner-dot {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.5);
+  margin: 0 12rpx;
 }
 .location-badge {
   display: inline-flex;
   align-items: center;
-  background: rgba(17, 24, 39, 0.05);
-  padding: 8rpx 20rpx;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6rpx 18rpx;
   border-radius: 30rpx;
-  margin-top: 8rpx;
-  width: fit-content;
 }
 .location-icon {
-  font-size: 24rpx;
-  margin-right: 6rpx;
+  font-size: 22rpx;
+  margin-left: 6rpx;
 }
 .location-badge text {
   font-size: 24rpx;
-  color: #4b5563;
+  color: #ffffff;
   font-weight: 500;
 }
 .nav-grid {
@@ -416,6 +544,11 @@ page {
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
   border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.status-waiting {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 .card-body {
   margin-bottom: 24rpx;
