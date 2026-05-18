@@ -34,9 +34,12 @@
         <text class="dot"></text>
         <text>最新动态</text>
       </view>
-      <view class="marquee-box">
-        <view class="marquee-track" :style="{animationDuration: marqueeDuration}">
-          <text class="marquee-item" v-for="(item, idx) in marqueeList" :key="idx">
+      <view class="marquee-box" v-if="marqueeList.length > 0">
+        <view class="marquee-track" :style="{transform: 'translateX(' + marqueeX + 'px)'}" id="marqueeTrack">
+          <text class="marquee-item" v-for="(item, idx) in marqueeList" :key="'a'+idx">
+            【{{ item.date }}】{{ item.text }}
+          </text>
+          <text class="marquee-item" v-for="(item, idx) in marqueeList" :key="'b'+idx">
             【{{ item.date }}】{{ item.text }}
           </text>
         </view>
@@ -98,16 +101,30 @@ const currentCity = ref('');
 const userCoords = ref(null);
 
 const marqueeList = ref([]);
-const marqueeDuration = computed(() => {
-  if (marqueeList.value.length === 0) return '20s';
-  // 按每条 ~8 秒计算总时长，保证固定速度
-  const total = marqueeList.value.reduce((sum, item) => {
-    const len = (item.text || '').length + (item.date || '').length + 5;
-    return sum + len;
-  }, 0);
-  // 每个字符约 0.3 秒，最少 15 秒
-  return Math.max(15, total * 0.3) + 's';
-});
+const marqueeX = ref(0);
+let marqueeTimer = null;
+
+const startMarquee = () => {
+  if (marqueeTimer) clearInterval(marqueeTimer);
+  marqueeX.value = 50;
+  marqueeTimer = setInterval(() => {
+    marqueeX.value -= 1;
+    if (marqueeX.value <= -marqueeHalfWidth.value) {
+      marqueeX.value += marqueeHalfWidth.value;
+    }
+  }, 30);
+};
+
+const marqueeHalfWidth = ref(9999);
+
+const measureMarquee = () => {
+  const query = uni.createSelectorQuery();
+  query.select('#marqueeTrack').boundingClientRect((rect) => {
+    if (rect) {
+      marqueeHalfWidth.value = rect.width / 2;
+    }
+  }).exec();
+};
 
 const fetchVenues = (page = 1) => {
   if (!userCoords.value) return;
@@ -161,6 +178,10 @@ const fetchReports = () => {
     success: (res) => {
       if (res.data && res.data.code === 200 && res.data.data) {
         marqueeList.value = res.data.data;
+        setTimeout(() => {
+          measureMarquee();
+          startMarquee();
+        }, 100);
       }
     }
   });
@@ -488,20 +509,11 @@ page {
 .marquee-track {
   display: flex;
   white-space: nowrap;
-  animation: scroll-text linear infinite;
 }
 .marquee-item {
   font-size: 26rpx;
   color: #374151;
   margin-right: 80rpx;
-}
-@keyframes scroll-text {
-  0% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
 }
 
 .filter-section {
