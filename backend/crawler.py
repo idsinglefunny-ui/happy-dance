@@ -114,10 +114,15 @@ def sync_data(is_manual=False):
             # MVP版本我们遍历所有的 ID 更新状态并入库
             success_count = 0
             
+            # 过滤垃圾数据
+            SPAM_NAMES = ['全成都中高端商K可安排']
+            all_halls = [h for h in all_halls if h.get('name', '') not in SPAM_NAMES]
+            print(f" -> 过滤后 {len(all_halls)} 个舞厅。")
+
             for index, hall_overview in enumerate(all_halls):
                 hall_id = hall_overview.get('id')
                 status = hall_overview.get('derived_status', 0)
-                
+
                 # 获取详细信息
                 detail = fetch_detail(hall_id)
                 if not detail:
