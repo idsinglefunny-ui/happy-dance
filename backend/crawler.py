@@ -115,15 +115,13 @@ def sync_data(is_manual=False):
                 
             all_halls = open_halls + closed_halls
             print(f" -> 接口共返回 {len(all_halls)} 个舞厅。")
-            
+
             # 为了测试速度，如果是大量数据，这里需要控制频率，或者只抓取未入库的详情
             # MVP版本我们遍历所有的 ID 更新状态并入库
             success_count = 0
-            
-            # 过滤垃圾数据
+
+            # 过滤垃圾数据（黑名单）
             SPAM_NAMES = ['全成都中高端商K可安排']
-            all_halls = [h for h in all_halls if h.get('name', '') not in SPAM_NAMES]
-            print(f" -> 过滤后 {len(all_halls)} 个舞厅。")
 
             for index, hall_overview in enumerate(all_halls):
                 source_id = hall_overview.get('id')
@@ -136,6 +134,8 @@ def sync_data(is_manual=False):
 
                 # 准备入库字段
                 name = detail.get('name', '')
+                if name in SPAM_NAMES:
+                    continue
                 province = detail.get('province', '')
                 city = detail.get('city', '')
                 address = detail.get('address', '')
