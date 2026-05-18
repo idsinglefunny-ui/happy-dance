@@ -14,7 +14,9 @@ backend/          — Python FastAPI backend (uvicorn, port 12800)
   api/security.py   — 签名验证 + AES-256-CBC 加解密
   crawler.py        — 数据抓取引擎 (从舞图图 api.dancehallmap.com 抓取)
   init_db.py        — 初始化数据库 (创建表)
-  schema.sql        — MySQL schema (不含 dance_hall_reports 表，该表在 app 启动时动态创建)
+  schema.sql        — MySQL schema
+  run_crawler.sh    — Cron 定时任务执行脚本
+  send_alert.py     — 飞书 webhook 告警（爬虫失败时通知）
 admin/            — Vue 3 + Vant 管理后台 (Vite build)
 miniprogram/      — 微信小程序前端 (uni-app 3.0)
   src/config.js      — API 地址配置 (根据 Vite 环境变量自动切换)
@@ -189,3 +191,27 @@ systemctl restart happy-dance      # restart
 - uv is installed at `/root/.local/bin/uv` with Aliyun PyPI mirror configured in `backend/uv.toml`
 - SSL certs auto-renew via acme.sh
 - Both `dance.index-tts.cn` and `dance-admin.index-tts.cn` proxy `/api/` to backend port 12800
+
+## Crawler Data Processing
+
+### ID 生成
+
+舞厅 ID 不使用外部 API 的 ID，而是用 `MD5(name + city + address)` 前 12 位 hex 转整数生成，确保确定性且无碰撞（`generate_hall_id()`）。
+
+### 数据清洗
+
+- **垃圾过滤**：按 name 黑名单（如"全成都中高端商K可安排"）和 moment_text 关键词过滤
+- **city/province 补齐**：从 address 字段自动匹配城市名和省份名，每次同步后执行 `backfill_location_fields()`
+- **province 标准化**：短名（如"四川"）自动转为全称（如"四川省"）
+- **空值保护**：`city` 和 `province` 字段不会被爬虫返回的空值覆盖
+
+### 公告时间 (`moment_updated_at`)
+
+| 情况 | `moment_updated_at` |
+|------|---------------------|
+| 公告有日期（如"5月16日暂停营业"） | 解析出的日期 |
+| 公告没日期，且内容和数据库不同 | `NOW()` |
+| 公告没日期，且内容和数据库一样 | 保留原值 |
+| 没有公告 | 保留原值 |
+
+Reports API 只展示 `moment_updated_at` 在今天和昨天的公告（2天窗口）。
