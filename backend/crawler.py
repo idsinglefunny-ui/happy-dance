@@ -67,6 +67,12 @@ def fetch_detail(hall_id):
         print(f"[Exception] 详情请求失败 {hall_id}: {e}")
         return None
 
+def generate_hall_id(name, city, address=''):
+    """用 name + city + address 的 MD5 前12位 hex 转整数作为 ID"""
+    raw = f"{name}{city}{address}"
+    hex_str = hashlib.md5(raw.encode()).hexdigest()[:12]
+    return int(hex_str, 16)
+
 def parse_moment_date(text):
     """从 moment_text 开头解析日期，返回 datetime 或 None"""
     if not text:
@@ -120,19 +126,22 @@ def sync_data(is_manual=False):
             print(f" -> 过滤后 {len(all_halls)} 个舞厅。")
 
             for index, hall_overview in enumerate(all_halls):
-                hall_id = hall_overview.get('id')
+                source_id = hall_overview.get('id')
                 status = hall_overview.get('derived_status', 0)
 
                 # 获取详细信息
-                detail = fetch_detail(hall_id)
+                detail = fetch_detail(source_id)
                 if not detail:
                     continue
-                    
+
                 # 准备入库字段
                 name = detail.get('name', '')
                 province = detail.get('province', '')
                 city = detail.get('city', '')
                 address = detail.get('address', '')
+
+                # 用 name + city + address 生成自己的 ID
+                hall_id = generate_hall_id(name, city, address)
                 longitude = detail.get('longitude', 0)
                 latitude = detail.get('latitude', 0)
                 hot = detail.get('hot', 0)
