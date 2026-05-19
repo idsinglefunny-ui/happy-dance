@@ -186,7 +186,7 @@ def sync_data(is_manual=False):
                     %s, %s, ST_GeomFromText(%s, 4326),
                     %s, %s, %s,
                     %s, %s, %s,
-                    %s, %s, COALESCE(%s, NOW())
+                    %s, %s, %s
                 )
                 ON DUPLICATE KEY UPDATE
                     `name`=VALUES(`name`), `province`=IF(VALUES(`province`)='', `province`, VALUES(`province`)), `city`=IF(VALUES(`city`)='', `city`, VALUES(`city`)),
