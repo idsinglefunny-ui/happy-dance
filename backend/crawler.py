@@ -68,9 +68,9 @@ def fetch_detail(hall_id):
         print(f"[Exception] 详情请求失败 {hall_id}: {e}")
         return None
 
-def generate_hall_id(name, city, address=''):
-    """用 name + city + address 的 MD5 前12位 hex 转整数作为 ID"""
-    raw = f"{name}{city}{address}"
+def generate_hall_id(source_id):
+    """用原始 API ID + 固定字符串的 MD5 前12位 hex 转整数作为 ID"""
+    raw = f"dance_king_{source_id}"
     hex_str = hashlib.md5(raw.encode()).hexdigest()[:12]
     return int(hex_str, 16)
 
@@ -141,8 +141,8 @@ def sync_data(is_manual=False):
                 city = detail.get('city', '')
                 address = detail.get('address', '')
 
-                # 用 name + city + address 生成自己的 ID
-                hall_id = generate_hall_id(name, city, address)
+                # 用原始 API ID + 固定字符串生成自己的 ID
+                hall_id = generate_hall_id(source_id)
                 longitude = detail.get('longitude', 0)
                 latitude = detail.get('latitude', 0)
                 hot = detail.get('hot', 0)
@@ -274,19 +274,42 @@ MUNICIPALITY_PROVINCE = {
     "北京市": "北京市", "天津市": "天津市", "上海市": "上海市", "重庆市": "重庆市",
 }
 
+import re
+
+def extract_city(address):
+    """从 address 中正则提取城市名（XX市/XX自治州）"""
+    if not address:
+        return ''
+    # 匹配 "XX市"、"XX自治州"、"XX盟"、"XX地区"、"XX县"（兜底）
+    m = re.search(r'([\u4e00-\u9fff]{2,6}(?:市|自治州|盟|地区))', address)
+    if m:
+        return m.group(1)
+    return ''
+
+def extract_province(address):
+    """从 address 中正则提取省份名"""
+    if not address:
+        return ''
+    m = re.search(r'([\u4e00-\u9fff]{2,6}(?:省|自治区|特别行政区))', address)
+    if m:
+        return m.group(1)
+    # 直辖市
+    m2 = re.search(r'((?:北京|天津|上海|重庆)市?)', address)
+    if m2:
+        name = m2.group(1)
+        if not name.endswith('市'):
+            name += '市'
+        return name
+    return ''
+
 def backfill_city(cursor):
     cursor.execute("SELECT id, address FROM dance_halls WHERE city IS NULL OR city = ''")
     rows = cursor.fetchall()
     updated = 0
     for r in rows:
-        addr = r['address'] or ''
-        matched = None
-        for city in CITIES:
-            if city in addr:
-                matched = city
-                break
-        if matched:
-            cursor.execute("UPDATE dance_halls SET city = %s WHERE id = %s", (matched, r['id']))
+        city = extract_city(r['address'] or '')
+        if city:
+            cursor.execute("UPDATE dance_halls SET city = %s WHERE id = %s", (city, r['id']))
             updated += 1
     if updated > 0:
         print(f" -> 自动补齐 {updated} 条记录的 city 字段")
@@ -309,23 +332,17 @@ def backfill_location_fields(cursor):
         city = r['city'] or ''
         province = r['province'] or ''
 
-        # 补齐 city
+        # 补齐 city：正则提取
         if not city:
-            for c in CITIES:
-                if c in addr:
-                    city = c
-                    break
+            city = extract_city(addr)
             if city:
                 city_updated += 1
 
-        # 补齐 province：优先从 address 匹配省名
+        # 补齐 province：正则提取
         if not province:
-            for prov_name, prov_short in PROVINCES:
-                if prov_name in addr or prov_short in addr[:6]:
-                    province = prov_name
-                    break
-            if not province and city in MUNICIPALITY_PROVINCE:
-                province = MUNICIPALITY_PROVINCE[city]
+            province = extract_province(addr)
+            if not province:
+                province = normalize_province(province)
 
         # 标准化 province（短名 -> 全称）
         if province:
