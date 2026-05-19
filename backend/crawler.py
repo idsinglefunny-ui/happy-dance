@@ -122,7 +122,7 @@ def sync_data(is_manual=False):
             success_count = 0
 
             # 过滤垃圾数据（黑名单）
-            SPAM_NAMES = ['全成都中高端商K可安排']
+            SPAM_NAMES = ['全成都中高端商K可安排', '商务KTV']
 
             for index, hall_overview in enumerate(all_halls):
                 source_id = hall_overview.get('id')
