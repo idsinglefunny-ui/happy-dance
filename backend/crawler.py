@@ -152,6 +152,8 @@ def sync_data(is_manual=False):
                 evening_hours = detail.get('eveningOpenCloseTime', '')
                 ticket_price = detail.get('ticket', '')
                 moment_text = detail.get('moment', '')
+                # 将换行符替换为逗号（小程序单行展示）
+                moment_text = moment_text.replace('\r\n', '，').replace('\n', '，').replace('\r', '，')
                 # 过滤垃圾信息
                 SPAM_KEYWORDS = ['商K可安排']
                 for kw in SPAM_KEYWORDS:
